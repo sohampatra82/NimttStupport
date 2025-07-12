@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure login for Support Department">
+    <title>Admin Login</title>
+    <link rel="shortcut icon"
+        href="https://ik.imagekit.io/7de5cntkw/1692626704665-photoaidcom-cropped%20(1).jpeg?updatedAt=1738048156918"
+        type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #1a202c;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            height: calc(100vh - 40px);
+            max-height: 600px;
+            margin: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            overflow: hidden;
+            background: #ffffff;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .left-section {
+            flex: 1;
+            background: linear-gradient(135deg, #2b6cb0 0%, #1a4971 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo {
+            max-width: 180px;
+            animation: scaleIn 1s ease-in-out;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .right-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 40px;
+        }
+
+        .login-panel {
+            width: 100%;
+            max-width: 400px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .login-panel h2 {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #1a202c;
+            letter-spacing: -0.3px;
+        }
+
+        .login-panel p {
+            text-align: center;
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        .login-panel label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .login-panel input[type="text"],
+        .login-panel input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            background-color: #f7fafc;
+            transition: all 0.3s ease;
+        }
+
+        .login-panel input[type="text"]:focus,
+        .login-panel input[type="password"]:focus {
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15);
+            background-color: #ffffff;
+            outline: none;
+        }
+
+        .login-panel input:invalid:not(:placeholder-shown) {
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #4a5568;
+            font-size: 13px;
+            font-weight: 500;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-password:hover {
+            color: #2b6cb0;
+        }
+
+        .login-panel button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #2b6cb0, #1a4971);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-panel button:hover:not(:disabled) {
+            background: linear-gradient(90deg, #1a4971, #153e61);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(43, 108, 176, 0.3);
+        }
+
+        .login-panel button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .login-panel button:disabled {
+            background: #b0b7c3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-panel button.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .login-panel button.loading span {
+            visibility: hidden;
+        }
+
+        .extra {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .extra a {
+            color: #2b6cb0;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .extra a:hover {
+            color: #1a4971;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: -12px;
+            margin-bottom: 12px;
+            display: none;
+            text-align: left;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+                max-height: none;
+                margin: 10px;
+                border-radius: 12px;
+            }
+
+            .left-section {
+                height: 150px;
+                flex: none;
+            }
+
+            .right-section {
+                padding: 24px;
+            }
+
+            .login-panel {
+                max-width: 100%;
+            }
+
+            .login-panel h2 {
+                font-size: 24px;
+            }
+
+            .login-panel p {
+                font-size: 13px;
+            }
+
+            .logo {
+                max-width: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .right-section {
+                padding: 16px;
+            }
+
+            .login-panel h2 {
+                font-size: 22px;
+            }
+
+            .login-panel p {
+                font-size: 12px;
+                margin-bottom: 16px;
+            }
+
+            .login-panel button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .login-panel input[type="text"],
+            .login-panel input[type="password"] {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+
+            .logo {
+                max-width: 100px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-section">
+            <img src="https://ik.imagekit.io/7de5cntkw/1692626704665-photoaidcom-cropped%20(1).jpeg?updatedAt=1738048156918"
+                alt="Support Department Logo" class="logo">
+        </div>
+        <div class="right-section">
+            <div class="login-panel">
+                <h2>Admin Login</h2>
+                <p>Secure access to your admin dashboard</p>
+                <form id="login-form"  action="/admin-login" method="post">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" ">
+                   
+
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" >
+                       
+                    </div>
+                </span>
+
+                    <button type="submit" id="login-button"><span>Sign In</span></button>
+                </form>
+                <div class="extra">
+                    <a href="/admin-change-password">Change Password?</a> |
+                    <a href="/admin-sign-up">Create New Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleText = document.querySelector('.toggle-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleText.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleText.textContent = 'Show';
+            }
+        }
+
+        const form = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-button');
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+
+        function validateForm() {
+            let isValid = true;
+
+            // Username validation
+            const usernamePattern = /^[A-Za-z0-9_]{3,20}$/;
+            if (!usernameInput.value.trim()) {
+                usernameError.textContent = 'Username is required';
+                usernameError.style.display = 'block';
+                usernameInput.setAttribute('aria-invalid', 'true');
+                isValid = false;
+            } else if (!usernamePattern.test(usernameInput.value.trim())) {
+                usernameError.textContent = 'Username must be 3-20 characters (letters, numbers, or underscores)';
+                usernameError.style.display = 'block';
+                usernameInput.setAttribute('aria-invalid', 'true');
+                isValid = false;
+            } else {
+                usernameError.style.display = 'none';
+                usernameInput.setAttribute('aria-invalid', 'false');
+            }
+
+            // Password validation
+            if (!passwordInput.value.trim()) {
+                passwordError.textContent = 'Password is required';
+                passwordError.style.display = 'block';
+                passwordInput.setAttribute('aria-invalid', 'true');
+                isValid = false;
+            } else if (passwordInput.value.length < 8) {
+                passwordError.textContent = 'Password must be at least 8 characters long';
+                passwordError.style.display = 'block';
+                passwordInput.setAttribute('aria-invalid', 'true');
+                isValid = false;
+            } else {
+                passwordError.style.display = 'none';
+                passwordInput.setAttribute('aria-invalid', 'false');
+            }
+
+            loginButton.disabled = !isValid;
+            return isValid;
+        }
+
+        usernameInput.addEventListener('input', validateForm);
+        passwordInput.addEventListener('input', validateForm);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (validateForm()) {
+                loginButton.classList.add('loading');
+                loginButton.disabled = true;
+
+                try {
+                    // Simulate async form submission (replace with actual backend API call)
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    console.log('Form submitted:', {
+                        username: usernameInput.value,
+                        password: passwordInput.value
+                    });
+                    alert('Login successful! (This is a demo)');
+                } catch (error) {
+                    alert('Login failed. Please try again.');
+                } finally {
+                    loginButton.classList.remove('loading');
+                    loginButton.disabled = false;
+                }
+            }
+        });
+    </script> -->
+</body>
+
+</html>
