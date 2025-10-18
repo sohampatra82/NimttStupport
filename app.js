@@ -18,8 +18,8 @@ const { isLength } = require("validator");
 const jwt = require("jsonwebtoken"); //REQUIRE JWT FOR AUTHENTICATION
 const cookieParser = require("cookie-parser"); //REQUIRE COOKIE PARSER
 app.set("view engine", "ejs"); //SET VIEW ENGINE TO EJS
-app.use(express.json()); //USE JSON
-app.use(express.urlencoded({ extended: true })); //USE URL ENCODED
+app.use(express.json({limit:'50mb'})); //USE JSON
+app.use(express.urlencoded({ limit:'50mb' ,extended: true })); //USE URL ENCODED
 app.use(express.static(path.join(__dirname, "public"))); //USE STATIC FILES
 app.use(cors()); //USE CORS
 app.use(cookieParser()); //USE COOKIE PARSER
