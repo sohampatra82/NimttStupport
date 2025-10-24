@@ -58,6 +58,271 @@ app.get("/admin-sign-up", (req, res) => {
 app.get("/admin-change-password", (req, res) => {
   res.render("forgotpass");
 });
+app.get("/delete-student-record", (req, res) => {
+  res.render("delete-record");
+});
+app.get("/authorized", (req, res) => {
+  res.render("authorized");
+});
+
+
+
+app.delete("/student-record-delete/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await StudentModel.deleteOne({ student_id: id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.json({ message: `Student ${id} deleted successfully` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting student" });
+  }
+});
+
+
+
+app.post("/authorized", (req, res) => {
+  const { username, password } = req.body;
+  let AdminUserName = "nimtt@admin2004";
+  let AdminPassword = "admin@remove";
+
+  try {
+    if (username === AdminUserName && password === AdminPassword) {
+      // Success message + redirect after 2 seconds
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Login Success</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              .animate-fadeIn {
+                animation: fadeIn 0.5s ease-out;
+              }
+              .spinner {
+                border: 4px solid rgba(0, 0, 0, 0.1);
+                border-left-color: #22c55e;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                animation: spin 1s linear infinite;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            </style>
+          </head>
+          <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center animate-fadeIn">
+              <div class="flex justify-center mb-4">
+                <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-green-600 mb-2">Login Successful!</h2>
+              <p class="text-gray-600 mb-4">Please wait, opening the Remove Details page...</p>
+              <div class="flex justify-center">
+                <div class="spinner"></div>
+              </div>
+              <script>
+                setTimeout(function(){
+                  window.location.href = "/delete-student-record";
+                }, 2000);
+              </script>
+            </div>
+          </body>
+        </html>
+      `);
+    } else {
+      // Error message + redirect after 2 seconds
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Login Failed</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              .animate-fadeIn {
+                animation: fadeIn 0.5s ease-out;
+              }
+              .spinner {
+                border: 4px solid rgba(0, 0, 0, 0.1);
+                border-left-color: #ef4444;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                animation: spin 1s linear infinite;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            </style>
+          </head>
+          <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center animate-fadeIn">
+              <div class="flex justify-center mb-4">
+                <svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-red-600 mb-2">Invalid Username or Password!</h2>
+              <p class="text-gray-600 mb-4">Redirecting back...</p>
+              <div class="flex justify-center">
+                <div class="spinner"></div>
+              </div>
+              <script>
+                setTimeout(function(){
+                  window.history.back();
+                }, 2000);
+              </script>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+  } catch (error) {
+    console.error("Error during authorization:", error);
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Server Error</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+          <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+            <h2 class="text-2xl font-bold text-red-600 mb-2">Internal Server Error</h2>
+            <p class="text-gray-600">Something went wrong. Please try again later.</p>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+});
+
+
+app.post("/admin-update-data", async (req, res) => {
+  try {
+    const {
+      student_id,
+      name,
+      course,
+      course_type,
+      university_board,
+      admission_date,
+      session,
+      exam_time,
+      father_name,
+      mother_name,
+      dob,
+      present_address,
+      permanent_address,
+      contact_no,
+      contact_no_2,
+      email,
+      counsellor,
+      aadhar_no,
+      status,
+      remarks,
+      university_regd_no
+    } = req.body;
+
+    // Validate required fields
+    if (!student_id) {
+      return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    // Validate email format if provided
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    // Validate contact numbers if provided (10 digits)
+    if (contact_no && !/^\d{10}$/.test(contact_no)) {
+      return res
+        .status(400)
+        .json({ message: "Contact Number must be a valid 10-digit number" });
+    }
+    if (contact_no_2 && !/^\d{10}$/.test(contact_no_2)) {
+      return res
+        .status(400)
+        .json({ message: "Contact Number 2 must be a valid 10-digit number" });
+    }
+
+    // Validate Aadhar number if provided (12 digits)
+    if (aadhar_no && !/^\d{12}$/.test(aadhar_no)) {
+      return res
+        .status(400)
+        .json({ message: "Aadhar Number must be a valid 12-digit number" });
+    }
+
+    // Validate dates if provided
+    if (admission_date && isNaN(Date.parse(admission_date))) {
+      return res.status(400).json({ message: "Invalid admission date format" });
+    }
+    if (dob && isNaN(Date.parse(dob))) {
+      return res.status(400).json({ message: "Invalid date of birth format" });
+    }
+
+    // Find the student
+    const student = await StudentModel.findOne({ student_id });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Update student document with provided fields
+    const updatedStudent = await StudentModel.findOneAndUpdate(
+      { student_id },
+      {
+        $set: {
+          name: name || student.name,
+          course: course || student.course,
+          course_type: course_type || student.course_type,
+          university_board: university_board || student.university_board,
+          admission_date: admission_date || student.admission_date,
+          session: session || student.session,
+          exam_time: exam_time || student.exam_time,
+          father_name: father_name || student.father_name,
+          mother_name: mother_name || student.mother_name,
+          dob: dob || student.dob,
+          present_address: present_address || student.present_address,
+          permanent_address: permanent_address || student.permanent_address,
+          contact_no: contact_no || student.contact_no,
+          contact_no_2: contact_no_2 || student.contact_no_2,
+          email: email || student.email,
+          counsellor: counsellor || student.counsellor,
+          aadhar_no: aadhar_no || student.aadhar_no,
+          status: status || student.status,
+          remarks: remarks || student.remarks,
+          university_regd_no: university_regd_no || student.university_regd_no
+        }
+      },
+      { new: true }
+    );
+
+    res.status(200).json(updatedStudent);
+  } catch (error) {
+    console.error("Error updating student:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 
 const uploadDir = path.join(__dirname, "public/uploads");
