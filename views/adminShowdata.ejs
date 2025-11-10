@@ -96,7 +96,7 @@
         }
 
         .header {
-            background: #ffffff;
+             
             padding: 20px 24px;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
@@ -612,15 +612,15 @@
     <div id="slider" class="slider">
         <div class="slider-header">
             <h3>Authorized Member Only</h3>
-            <button id="close-slider">×</button>
+            <button id="close-slider">x</button>
         </div>
         <div class="slider-content">
-            <button id="authorized-btn">Authorized Member Only⚠️</button>
+            <button id="authorized-btn">Authorized Member Only</button>
         </div>
     </div>
 
     <script>
-       const { jsPDF } = window.jspdf;
+        const { jsPDF } = window.jspdf;
         let isEditing = false;
 
         const fieldMap = {
@@ -644,14 +644,16 @@
             aadhar_no: "Aadhar Number",
             status: "Status",
             remarks: "Remarks",
-            university_regd_no: "University Registration Number"
+            university_regd_no: "University Registration Number",
+            photo: "Student Photo",
+            document: "Document (PDF/ID)",
+            additional_sheet: "Additional Sheet"
         };
 
         const showModal = (title, message) => {
-            const modal = document.getElementById('modal');
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
-            modal.style.display = 'flex';
+            document.getElementById('modal').style.display = 'flex';
         };
 
         document.getElementById('modal-close').addEventListener('click', () => {
@@ -667,37 +669,40 @@
                 const month = String(date.getMonth() + 1).padStart(2, "0");
                 const year = date.getFullYear();
                 return `${day}-${month}-${year}`;
-            } catch (error) {
-                console.error("Error formatting date:", error);
+            } catch {
                 return "N/A";
             }
         }
 
         function debounce(func, wait) {
             let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
+            return function (...args) {
                 clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
+                timeout = setTimeout(() => func(...args), wait);
             };
         }
 
-        async function getImageDataURL(url) {
+        function plainTextForPdf(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            const img = div.querySelector('img');
+            if (img) return img.src;
+            const a = div.querySelector('a');
+            if (a) return a.href;
+            return div.textContent || "";
+        }
+
+        async function getBase64Image(url) {
             try {
-                if (!url || url === "#" || url === "") return null;
-                const response = await fetch(url, { mode: "cors", credentials: "include" });
-                if (!response.ok) throw new Error("Failed to fetch image");
+                const response = await fetch(url, { credentials: "include" });
+                if (!response.ok) return null;
                 const blob = await response.blob();
                 return new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
                     reader.readAsDataURL(blob);
                 });
-            } catch (error) {
-                console.error("Error fetching image:", error);
+            } catch {
                 return null;
             }
         }
@@ -726,42 +731,54 @@
                 }
 
                 const studentData = await response.json();
-                console.log("Received student data:", studentData);
 
-                if (studentData) {
-                    const tableRows = Object.entries(fieldMap)
-                        .map(([field, label]) => {
-                            let value = studentData[field] !== undefined && studentData[field] !== null ? studentData[field] : "N/A";
-                            if (field === "admission_date" || field === "dob") {
-                                value = formatDate(value);
-                            }
-                            return `
-                        <tr>
-                            <td>${label}</td>
-                            <td data-field="${field}">${value}</td>
-                        </tr>
-                    `;
-                        }).join('');
+                const tableRows = Object.entries(fieldMap)
+                    .map(([field, label]) => {
+                        let value = studentData[field] ?? "N/A";
 
-                    document.getElementById('student-details').innerHTML = `
-                <table class="excel-table">
-                    <tr>
-                        <th>Field</th>
-                        <th>Details</th>
-                    </tr>
-                    ${tableRows}
-                </table>
-            `;
-                    document.getElementById('student-details').style.display = 'block';
-                    document.getElementById('update-data').style.display = 'flex';
-                    document.getElementById('save-data').style.display = 'none';
-                    isEditing = false;
-                } else {
-                    throw new Error("No student data returned");
-                }
+                        if (field === "admission_date" || field === "dob") {
+                            value = formatDate(value);
+                        }
+
+                        if (field === "photo" && value && value !== "N/A") {
+                            value = `<img src="${value}" alt="Photo" style="max-height:120px; max-width:100%; border-radius:4px; cursor:pointer;" title="Click to enlarge">`;
+                        } else if ((field === "document" || field === "additional_sheet") && value && value !== "N/A") {
+                            value = `<a href="${value}" target="_blank" style="color:#3b82f6; text-decoration:underline;">View / Download</a>`;
+                        }
+
+                        return `<tr><td>${label}</td><td data-field="${field}" data-original="${encodeURIComponent(value)}">${value}</td></tr>`;
+                    }).join('');
+
+                document.getElementById('student-details').innerHTML = `
+                    <table class="excel-table">
+                        <tr><th>Field</th><th>Details</th></tr>
+                        ${tableRows}
+                    </table>
+                `;
+
+                document.getElementById('student-details').style.display = 'block';
+                document.getElementById('update-data').style.display = 'flex';
+                document.getElementById('save-data').style.display = 'none';
+                isEditing = false;
+
+                // Click to enlarge photo
+                document.querySelectorAll('img[alt="Photo"]').forEach(img => {
+                    img.onclick = () => {
+                        const overlay = document.createElement('div');
+                        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:3000;cursor:pointer;';
+                        const largeImg = document.createElement('img');
+                        largeImg.src = img.src;
+                        largeImg.style.maxHeight = '90vh';
+                        largeImg.style.maxWidth = '90vw';
+                        largeImg.style.borderRadius = '8px';
+                        overlay.appendChild(largeImg);
+                        overlay.onclick = () => overlay.remove();
+                        document.body.appendChild(overlay);
+                    };
+                });
+
             } catch (error) {
-                console.error("Error fetching student data:", error);
-                document.getElementById('student-details').innerHTML = `<p class="error">${error.message || "No student found with this ID."}</p>`;
+                document.getElementById('student-details').innerHTML = `<p class="error">${error.message || "No student found."}</p>`;
                 document.getElementById('student-details').style.display = 'block';
                 document.getElementById('update-data').style.display = 'none';
                 document.getElementById('save-data').style.display = 'none';
@@ -769,47 +786,45 @@
         }, 300);
 
         document.getElementById('search-btn').addEventListener('click', () => {
-            const studentId = document.getElementById('student-id').value.trim();
-            fetchStudentData(studentId);
+            fetchStudentData(document.getElementById('student-id').value.trim());
         });
 
-        document.getElementById('student-id').addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const studentId = document.getElementById('student-id').value.trim();
-                fetchStudentData(studentId);
-            }
+        document.getElementById('student-id').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchStudentData(e.target.value.trim());
         });
 
+        // UPDATE MODE — KEEP photo & links
         document.getElementById('update-data').addEventListener('click', () => {
-            if (!isEditing) {
-                isEditing = true;
-                document.getElementById('update-data').style.display = 'none';
-                document.getElementById('save-data').style.display = 'flex';
+            if (isEditing) return;
+            isEditing = true;
+            document.getElementById('update-data').style.display = 'none';
+            document.getElementById('save-data').style.display = 'flex';
 
-                document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
-                    const field = cell.dataset.field;
-                    const currentValue = cell.textContent.trim();
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'editable-input';
-                    input.value = currentValue;
-                    if (field === 'admission_date' || field === 'dob') {
-                        input.type = 'date';
-                        input.value = currentValue !== 'N/A' ? currentValue.split('-').reverse().join('-') : '';
-                    } else if (field === 'contact_no' || field === 'contact_no_2') {
-                        input.type = 'tel';
-                    } else if (field === 'email') {
-                        input.type = 'email';
-                    } else if (field === 'aadhar_no') {
-                        input.type = 'tel';
-                    }
-                    cell.innerHTML = '';
-                    cell.appendChild(input);
-                });
-            }
+            document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
+                const field = cell.dataset.field;
+                if (["photo", "document", "additional_sheet"].includes(field)) return;
+
+                const currentValue = cell.textContent.trim();
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'editable-input';
+                input.value = currentValue === 'N/A' ? '' : currentValue;
+
+                if (field === 'admission_date' || field === 'dob') {
+                    input.type = 'date';
+                    input.value = currentValue !== 'N/A' ? currentValue.split('-').reverse().join('-') : '';
+                } else if (['contact_no', 'contact_no_2', 'aadhar_no'].includes(field)) {
+                    input.type = 'tel';
+                } else if (field === 'email') {
+                    input.type = 'email';
+                }
+
+                cell.innerHTML = '';
+                cell.appendChild(input);
+            });
         });
 
+        // SAVE CHANGES
         document.getElementById('save-data').addEventListener('click', async () => {
             const studentId = document.getElementById('student-id').value.trim();
             const updatedData = {};
@@ -817,48 +832,46 @@
 
             document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
                 const field = cell.dataset.field;
+                if (["photo", "document", "additional_sheet"].includes(field)) return;
+
                 const input = cell.querySelector('input');
-                if (input) {
-                    let value = input.value.trim();
-                    if (field === 'admission_date' || field === 'dob') {
-                        if (value && !isNaN(Date.parse(value))) {
-                            value = new Date(value).toISOString();
-                        } else if (value) {
-                            input.classList.add('input-error');
-                            isValid = false;
-                            return;
-                        }
-                    } else if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                if (!input) return;
+
+                let value = input.value.trim();
+
+                if (field === 'admission_date' || field === 'dob') {
+                    if (value && isNaN(Date.parse(value))) {
                         input.classList.add('input-error');
                         isValid = false;
-                        return;
-                    } else if ((field === 'contact_no' || field === 'contact_no_2') && value && !/^\d{10}$/.test(value)) {
-                        input.classList.add('input-error');
-                        isValid = false;
-                        return;
-                    } else if (field === 'aadhar_no' && value && !/^\d{12}$/.test(value)) {
-                        input.classList.add('input-error');
-                        isValid = false;
-                        return;
+                    } else {
+                        value = value ? new Date(value).toISOString() : null;
                     }
+                } else if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    input.classList.add('input-error');
+                    isValid = false;
+                } else if (['contact_no', 'contact_no_2'].includes(field) && value && !/^\d{10}$/.test(value)) {
+                    input.classList.add('input-error');
+                    isValid = false;
+                } else if (field === 'aadhar_no' && value && !/^\d{12}$/.test(value)) {
+                    input.classList.add('input-error');
+                    isValid = false;
+                } else {
                     input.classList.remove('input-error');
-                    updatedData[field] = value || null;
-                    cell.textContent = (field === 'admission_date' || field === 'dob') ? formatDate(value) : value || 'N/A';
+                }
+
+                updatedData[field] = value || null;
+
+                // Restore original HTML (photo/link) or show updated text
+                const originalHTML = decodeURIComponent(cell.dataset.original);
+                if (["photo", "document", "additional_sheet"].includes(field)) {
+                    cell.innerHTML = originalHTML;
+                } else {
+                    cell.textContent = (field === 'admission_date' || field === 'dob') ? formatDate(value) : (value || 'N/A');
                 }
             });
 
             if (!isValid) {
-                showModal('Validation Error', 'Please correct invalid inputs (e.g., valid dates, email, or contact numbers).');
-                document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
-                    const field = cell.dataset.field;
-                    const currentValue = cell.textContent.trim();
-                    const input = document.createElement('input');
-                    input.type = field.includes('date') ? 'date' : field === 'email' ? 'email' : (field.includes('contact') || field === 'aadhar_no') ? 'tel' : 'text';
-                    input.className = 'editable-input';
-                    input.value = currentValue !== 'N/A' ? (field.includes('date') ? currentValue.split('-').reverse().join('-') : currentValue) : '';
-                    cell.innerHTML = '';
-                    cell.appendChild(input);
-                });
+                showModal('Validation Error', 'Please correct the highlighted fields.');
                 return;
             }
 
@@ -871,109 +884,94 @@
 
                 const result = await response.json();
                 if (response.ok) {
-                    const successMessage = document.createElement('div');
-                    successMessage.className = 'success-message';
-                    successMessage.textContent = 'Data updated successfully!';
-                    document.getElementById('student-details').prepend(successMessage);
-
-                    setTimeout(() => {
-                        successMessage.style.opacity = '0';
-                        successMessage.style.transform = 'translateY(-10px)';
-                        setTimeout(() => successMessage.remove(), 300);
-                    }, 3000);
-
+                    const msg = document.createElement('div');
+                    msg.className = 'success-message';
+                    msg.textContent = 'Data updated successfully!';
+                    document.getElementById('student-details').prepend(msg);
+                    setTimeout(() => msg.remove(), 3000);
                     isEditing = false;
                     document.getElementById('update-data').style.display = 'flex';
                     document.getElementById('save-data').style.display = 'none';
                     fetchStudentData(studentId);
                 } else {
-                    showModal('Update Failed', `Failed to update data: ${result.message}`);
-                    document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
-                        const field = cell.dataset.field;
-                        const currentValue = cell.textContent.trim();
-                        const input = document.createElement('input');
-                        input.type = field.includes('date') ? 'date' : field === 'email' ? 'email' : (field.includes('contact') || field === 'aadhar_no') ? 'tel' : 'text';
-                        input.className = 'editable-input';
-                        input.value = currentValue !== 'N/A' ? (field.includes('date') ? currentValue.split('-').reverse().join('-') : currentValue) : '';
-                        cell.innerHTML = '';
-                        cell.appendChild(input);
-                    });
+                    showModal('Update Failed', result.message || 'Failed to update');
                 }
-            } catch (error) {
-                console.error('Error updating data:', error);
-                showModal('Update Failed', 'Failed to update data. Please try again later.');
-                document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
-                    const field = cell.dataset.field;
-                    const currentValue = cell.textContent.trim();
-                    const input = document.createElement('input');
-                    input.type = field.includes('date') ? 'date' : field === 'email' ? 'email' : (field.includes('contact') || field === 'aadhar_no') ? 'tel' : 'text';
-                    input.className = 'editable-input';
-                    input.value = currentValue !== 'N/A' ? (field.includes('date') ? currentValue.split('-').reverse().join('-') : currentValue) : '';
-                    cell.innerHTML = '';
-                    cell.appendChild(input);
+            } catch {
+                showModal('Error', 'Network error. Try again.');
+            }
+        });
+
+        // PDF — Small photo (40x50mm), right side, multi-page
+        // PDF: ONE PAGE ONLY
+            document.getElementById('download-btn').onclick = async () => {
+                const sid = document.getElementById('student-id').value.trim();
+                if (!sid || document.getElementById('student-details').style.display !== 'block') {
+                    showModal('Error', 'Search a student first.');
+                    return;
+                }
+
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                let y = 15;
+
+                // Title
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("Student Details Report", 14, y);
+                y += 8;
+
+                // Photo on right (35x45 mm)
+                const photoImg = document.querySelector('td[data-field="photo"] img');
+                if (photoImg) {
+                    const b64 = await getBase64Image(photoImg.src);
+                    if (b64) {
+                        const imgProps = doc.getImageProperties(b64);
+                        const w = 35, h = 45;
+                        const ratio = Math.min(w / imgProps.width, h / imgProps.height);
+                        const iw = imgProps.width * ratio, ih = imgProps.height * ratio;
+                        doc.addImage(b64, 'JPEG', 155, y - 3, iw, ih);
+                        y += 48;
+                    }
+                }
+
+                // Table data
+                const rows = Array.from(document.querySelectorAll('.excel-table tr')).slice(1).map(r => {
+                    const c = r.querySelectorAll('td');
+                    return [c[0].textContent, plainTextForPdf(c[1].innerHTML)];
                 });
-            }
-        });
 
-        document.getElementById('download-btn').addEventListener('click', async () => {
-            const studentId = document.getElementById('student-id').value.trim();
-            if (!studentId || document.getElementById('student-details').style.display !== 'block') {
-                showModal('Download Error', 'Please enter a Student ID to download the statement.');
-                return;
-            }
+                // Compact table (fits on one page)
+                doc.autoTable({
+                    startY: y,
+                    head: [['Field', 'Details']],
+                    body: rows,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [30, 58, 138],
+                        textColor: [255, 255, 255],
+                        fontSize: 9,
+                        fontStyle: 'bold'
+                    },
+                    bodyStyles: {
+                        fontSize: 9,
+                        cellPadding: 1.5
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 50 },
+                        1: { cellWidth: 110 }
+                    },
+                    margin: { left: 14, right: 14, top: 10 },
+                    styles: {
+                        lineWidth: 0.1,
+                        lineColor: [200, 200, 200],
+                        overflow: 'linebreak'
+                    },
+                    pageBreak: 'avoid'  // Ensures everything stays on ONE page
+                });
 
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
+                doc.save(`student_${sid}_details.pdf`);
+            };
 
-            doc.setFontSize(16);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(0, 0, 0);
-            doc.text("Student Details Report", 14, 20);
-
-            const rows = document.querySelectorAll('.excel-table tr');
-            const tableData = Array.from(rows).slice(1).map(row => {
-                const cells = row.querySelectorAll('td');
-                return [
-                    cells[0].textContent,
-                    cells[1].textContent
-                ];
-            });
-
-            doc.autoTable({
-                startY: 30,
-                head: [['Field', 'Details']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: {
-                    fillColor: [30, 58, 138],
-                    textColor: [255, 255, 255],
-                    fontSize: 12,
-                    fontStyle: 'bold',
-                    font: "helvetica"
-                },
-                bodyStyles: {
-                    fontSize: 11,
-                    textColor: [0, 0, 0],
-                    font: "helvetica"
-                },
-                alternateRowStyles: {
-                    fillColor: [249, 250, 251]
-                },
-                margin: { left: 14, right: 14 },
-                tableWidth: 'auto',
-                styles: {
-                    font: "helvetica",
-                    lineWidth: 0.2,
-                    lineColor: [229, 231, 235]
-                }
-            });
-
-            doc.save(`student_${studentId}_details.pdf`);
-        });
-
+        // Settings slider
         document.getElementById('settings-icon').addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('slider').classList.add('open');

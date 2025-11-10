@@ -12,15 +12,6 @@
     type="image/x-icon">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    .success-message {
-      display: none;
-      background-color: #4caf50;
-      color: white;
-      padding: 10px;
-      text-align: center;
-      margin-top: 10px;
-      border-radius: 5px;
-    }
     * {
       margin: 0;
       padding: 0;
@@ -45,11 +36,9 @@
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
       padding: 80px 48px 48px 48px;
-      /* Increased top padding for logo */
       margin: 24px;
       animation: fadeIn 0.6s ease-in-out;
       position: relative;
-      /* Allows absolute positioning of the logo */
     }
 
     .top-left-logo {
@@ -82,7 +71,6 @@
     .form-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(5, auto);
       gap: 24px;
       margin-bottom: 32px;
       animation: slideUp 0.6s ease-out;
@@ -111,7 +99,6 @@
       background-color: #fafafa;
       transition: all 0.2s ease;
       width: 100%;
-      min-width: 0;
     }
 
     .form-group input:focus,
@@ -147,11 +134,7 @@
       font-size: 16px;
     }
 
-    .error-message {
-      display: none;
-      aria-live: "polite";
-    }
-
+    .error-message,
     .error-icon {
       display: none;
     }
@@ -179,16 +162,23 @@
     }
 
     .checkbox-group label {
-      margin: 2px;
       font-size: 14px;
       font-weight: 500;
       color: #1f2a44;
       cursor: pointer;
     }
 
-    .submit-btn {
+    .submit-area {
       grid-column: 1 / -1;
-      padding: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 50px;
+    }
+
+    .submit-btn {
+      padding: 14px 32px;
       background-color: #2664c8;
       border: none;
       border-radius: 8px;
@@ -208,16 +198,46 @@
     .submit-btn:disabled {
       background: #d1d5db;
       cursor: not-allowed;
-      transform: none;
     }
 
-    .success-message {
+    .loader {
+      display: none;
+      width: 24px;
+      height: 24px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #2664c8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .message {
       display: none;
       text-align: center;
-      color: #ffffff;
-      font-size: 14px;
+      padding: 12px;
+      border-radius: 8px;
       margin-top: 16px;
+      font-size: 14px;
+      font-weight: 500;
       animation: fadeIn 0.3s ease-in;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
 
     @keyframes fadeIn {
@@ -267,7 +287,6 @@
 
       .container {
         padding: 60px 24px 24px 24px;
-        /* Adjusted for smaller logo */
         margin: 16px;
       }
 
@@ -280,29 +299,12 @@
       h1 {
         font-size: 28px;
       }
-
-      .subtitle {
-        font-size: 14px;
-      }
     }
 
     @media (max-width: 480px) {
       .submit-btn {
         font-size: 14px;
         padding: 12px;
-      }
-
-      .form-group input,
-      .form-group select {
-        font-size: 13px;
-      }
-
-      .form-group label {
-        font-size: 13px;
-      }
-
-      .checkbox-group {
-        padding: 6px 10px;
       }
 
       .top-left-logo {
@@ -315,11 +317,13 @@
 <body>
   <div class="container">
     <img src="https://ik.imagekit.io/7de5cntkw/1692626704665-photoaidcom-cropped%20(1).jpeg?updatedAt=1738048156918"
-      alt="Student Support Logo" class="top-left-logo">
+      alt="Logo" class="top-left-logo">
     <h1>Student Support Dashboard</h1>
     <p class="subtitle">Submit student details to connect with our support team</p>
+
     <form id="student-form" action="/support-department" method="post" enctype="multipart/form-data" novalidate>
       <div class="form-grid">
+        <!-- All fields same as before -->
         <div class="form-group">
           <label for="student-id">Student ID</label>
           <input type="text" id="student-id" name="student_id" placeholder="Enter student ID" required
@@ -331,7 +335,7 @@
           <label for="name">Student Name</label>
           <input type="text" id="name" name="name" placeholder="Enter full name" required pattern="[A-Za-z\s]{2,50}">
           <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="name-error">Name must be 2-50 characters (letters and spaces only)</span>
+          <span class="error-message" id="name-error">Name must be 2-50 characters (letters only)</span>
         </div>
         <div class="form-group">
           <label for="course">Course Name</label>
@@ -353,7 +357,8 @@
         </div>
         <div class="form-group">
           <label for="university-board">University/Board</label>
-          <input type="text" id="university-board" name="university_board" placeholder="Enter university/board" required>
+          <input type="text" id="university-board" name="university_board" placeholder="Enter university/board"
+            required>
           <i class="fas fa-exclamation-circle error-icon"></i>
           <span class="error-message" id="university-board-error">University/board is required</span>
         </div>
@@ -369,13 +374,12 @@
           <i class="fas fa-exclamation-circle error-icon"></i>
           <span class="error-message" id="session-error">Enter session in YYYY-YYYY format</span>
         </div>
-      <div class="form-group">
-        <label for="exam-time">Exam Time</label>
-        <input type="text" id="exam-time" name="exam_time" required placeholder="Enter exam time">
-        <i class="fas fa-exclamation-circle error-icon"></i>
-        <span class="error-message" id="exam-time-error">Please enter a valid time</span>
-      </div>
-
+        <div class="form-group">
+          <label for="exam-time">Exam Time</label>
+          <input type="text" id="exam-time" name="exam_time" required placeholder="Enter exam time">
+          <i class="fas fa-exclamation-circle error-icon"></i>
+          <span class="error-message" id="exam-time-error">Please enter a valid time</span>
+        </div>
         <div class="form-group">
           <label for="father-name">Father's Name</label>
           <input type="text" id="father-name" name="father_name" placeholder="Enter father's name" required
@@ -396,10 +400,10 @@
           <i class="fas fa-exclamation-circle error-icon"></i>
           <span class="error-message" id="dob-error">Please select a valid date</span>
         </div>
-       
         <div class="form-group">
           <label for="contact-no">Contact Number</label>
-          <input type="tel" id="contact-no" name="contact_no" placeholder="Enter contact number" required pattern="\d{10}">
+          <input type="tel" id="contact-no" name="contact_no" placeholder="Enter contact number" required
+            pattern="\d{10}">
           <i class="fas fa-exclamation-circle error-icon"></i>
           <span class="error-message" id="contact-no-error">Enter a valid 10-digit phone number</span>
         </div>
@@ -424,7 +428,8 @@
         </div>
         <div class="form-group">
           <label for="permanent-address">Permanent Address</label>
-          <input type="text" id="permanent-address" name="permanent_address" placeholder="Enter permanent address" required>
+          <input type="text" id="permanent-address" name="permanent_address" placeholder="Enter permanent address"
+            required>
           <div class="checkbox-group">
             <input type="checkbox" id="same-as-present" name="same_as_present">
             <label for="same-as-present">Same as Present Address</label>
@@ -474,123 +479,154 @@
           <label for="photo">Upload Photo</label>
           <input type="file" id="photo" name="photo" accept="image/*" required>
           <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="photo-error">Please upload a photo</span>
+          <span class="error-message" id="photo-error">Please upload a photo (max 5 MB)</span>
         </div>
         <div class="form-group">
-          <label for="document">Upload Document</label>
+          <label for="document">University Document</label>
           <input type="file" id="document" name="document" accept=".pdf,.doc,.docx" required>
           <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="document-error">Please upload a document</span>
+          <span class="error-message" id="document-error">Please upload a document (max 5 MB)</span>
         </div>
         <div class="form-group">
-          <label for="additional-sheet">Upload Additional Sheet</label>
+          <label for="additional-sheet">Nimtt Document</label>
           <input type="file" id="additional-sheet" name="additional_sheet" accept=".pdf,.doc,.docx">
           <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="additional-sheet-error">Additional sheet is optional</span>
+          <span class="error-message" id="additional-sheet-error">Additional sheet is optional (max 5 MB)</span>
         </div>
-        <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+
+        <!-- Submit + Loader -->
+        <div class="submit-area">
+          <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+          <div class="loader" id="loader"></div>
+        </div>
       </div>
-      <div class="success-message" id="success-message">Form submitted successfully!</div>
-      </form>
+
+      <!-- Global Message -->
+      <div class="message" id="message"></div>
+    </form>
   </div>
 
   <script>
     const form = document.getElementById('student-form');
-      const presentAddress = document.getElementById('present-address');
-      const permanentAddress = document.getElementById('permanent-address');
-      const sameAsPresent = document.getElementById('same-as-present');
-      const submitBtn = document.getElementById('submit-btn');
-      const successMessage = document.getElementById('success-message');
+    const presentAddress = document.getElementById('present-address');
+    const permanentAddress = document.getElementById('permanent-address');
+    const sameAsPresent = document.getElementById('same-as-present');
+    const submitBtn = document.getElementById('submit-btn');
+    const loader = document.getElementById('loader');
+    const message = document.getElementById('message');
 
-      sameAsPresent.addEventListener('change', () => {
-        if (sameAsPresent.checked) {
-          permanentAddress.value = presentAddress.value;
-          permanentAddress.disabled = true;
-        } else {
-          permanentAddress.value = '';
+    // Same as Present
+    sameAsPresent.addEventListener('change', () => {
+      if (sameAsPresent.checked) {
+        permanentAddress.value = presentAddress.value;
+        permanentAddress.disabled = true;
+      } else {
+        permanentAddress.value = '';
+        permanentAddress.disabled = false;
+      }
+    });
+
+    presentAddress.addEventListener('input', () => {
+      if (sameAsPresent.checked) permanentAddress.value = presentAddress.value;
+    });
+
+    // Loader
+    const showLoader = () => { submitBtn.style.display = 'none'; loader.style.display = 'block'; };
+    const hideLoader = () => { submitBtn.style.display = 'block'; loader.style.display = 'none'; };
+
+    // Message
+    const showMessage = (text, isError = false) => {
+      message.textContent = text;
+      message.className = `message ${isError ? 'error' : 'success'}`;
+      message.style.display = 'block';
+      setTimeout(() => message.style.display = 'none', 5000);
+    };
+
+    // Clear field errors
+    const clearFieldErrors = () => form.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
+
+    // Client Validation
+    const validateClient = () => {
+      let valid = true;
+      clearFieldErrors();
+      const maxSize = 5 * 1024 * 1024;
+
+      form.querySelectorAll('input[required], select[required]').forEach(input => {
+        const group = input.closest('.form-group');
+        const err = document.getElementById(`${input.id}-error`);
+        let val = input.value.trim();
+
+        if (input.id === 'permanent-address' && sameAsPresent.checked) val = presentAddress.value.trim();
+
+        if (!val && input.type !== 'file') {
+          group.classList.add('invalid');
+          err.textContent = `${input.name.replace(/_/g, ' ')} is required`;
+          valid = false;
+        }
+
+        if (input.pattern && val && !new RegExp(`^${input.pattern}$`).test(val)) {
+          group.classList.add('invalid');
+          valid = false;
+        }
+
+        if (input.type === 'file' && input.files[0]?.size > maxSize) {
+          group.classList.add('invalid');
+          err.textContent = 'File too large. Max 5 MB.';
+          valid = false;
+        }
+      });
+
+      return valid;
+    };
+
+    // Submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateClient()) return;
+
+      const formData = new FormData(form);
+      if (sameAsPresent.checked && !formData.get('permanent_address')) {
+        formData.set('permanent_address', presentAddress.value);
+      }
+
+      showLoader();
+
+      try {
+        const res = await fetch('/support-department', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          showMessage(data.message || 'Student registered successfully!');
+          form.reset();
+          sameAsPresent.checked = false;
           permanentAddress.disabled = false;
-        }
-      });
-
-      presentAddress.addEventListener('input', () => {
-        if (sameAsPresent.checked) {
-          permanentAddress.value = presentAddress.value;
-        }
-      });
-
-      function clearErrors() {
-        form.querySelectorAll('.form-group').forEach(group => {
-          group.classList.remove('invalid');
-        });
-      }
-
-      function validateForm() {
-        let isValid = true;
-        clearErrors();
-        const inputs = form.querySelectorAll('input[required], select[required]');
-        inputs.forEach(input => {
-          const formGroup = input.closest('.form-group');
-          const errorElement = document.getElementById(`${input.id}-error`);
-          let value = input.value.trim();
-          if (input.id === 'permanent-address' && sameAsPresent.checked) {
-            value = presentAddress.value.trim();
-          }
-          if (!value) {
-            formGroup.classList.add('invalid');
-            errorElement.textContent = `${input.name.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())} is required`;
-            isValid = false;
-          } else if (input.pattern && !new RegExp(input.pattern).test(value)) {
-            formGroup.classList.add('invalid');
-            isValid = false;
-          }
-        });
-        return isValid;
-      }
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (validateForm()) {
-          const formData = new FormData(form);
-          if (sameAsPresent.checked && !formData.get('permanent_address')) {
-            formData.set('permanent_address', presentAddress.value);
-          }
-          for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-          }
-          try {
-            const response = await fetch("/support-department", {
-              method: "POST",
-              body: formData,
+        } else {
+          // Show field-specific errors
+          if (data.errors && Array.isArray(data.errors)) {
+            data.errors.forEach(err => {
+              const field = document.getElementById(err.field);
+              if (field) {
+                const group = field.closest('.form-group');
+                const msg = document.getElementById(`${field.id}-error`);
+                group.classList.add('invalid');
+                msg.textContent = err.msg; // e.g., "Email already exists"
+              }
             });
-            const result = await response.json();
-            if (response.ok) {
-              successMessage.textContent = result.message;
-              successMessage.style.display = "block";
-              form.reset();
-              setTimeout(() => {
-                successMessage.style.display = "none";
-              }, 3000);
-            } else {
-              successMessage.textContent = result.error || "Failed to submit form";
-              successMessage.style.display = "block";
-              successMessage.style.backgroundColor = "#f44336";
-              setTimeout(() => {
-                successMessage.style.display = "none";
-                successMessage.style.backgroundColor = "#4caf50";
-              }, 3000);
-            }
-          } catch (error) {
-            console.error("Error submitting form:", error);
-            successMessage.textContent = "Error submitting form";
-            successMessage.style.display = "block";
-            successMessage.style.backgroundColor = "#f44336";
-            setTimeout(() => {
-              successMessage.style.display = "none";
-              successMessage.style.backgroundColor = "#4caf50";
-            }, 3000);
+            showMessage('Please fix the errors above.', true);
+          } else {
+            showMessage(data.error || 'Submission failed', true);
           }
         }
-     });
+      } catch (err) {
+        showMessage('Network error. Try again.', true);
+      } finally {
+        hideLoader();
+      }
+    });
   </script>
 </body>
 
