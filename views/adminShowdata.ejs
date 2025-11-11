@@ -920,18 +920,7 @@
                 y += 8;
 
                 // Photo on right (35x45 mm)
-                const photoImg = document.querySelector('td[data-field="photo"] img');
-                if (photoImg) {
-                    const b64 = await getBase64Image(photoImg.src);
-                    if (b64) {
-                        const imgProps = doc.getImageProperties(b64);
-                        const w = 35, h = 45;
-                        const ratio = Math.min(w / imgProps.width, h / imgProps.height);
-                        const iw = imgProps.width * ratio, ih = imgProps.height * ratio;
-                        doc.addImage(b64, 'JPEG', 155, y - 3, iw, ih);
-                        y += 48;
-                    }
-                }
+             
 
                 // Table data
                 const rows = Array.from(document.querySelectorAll('.excel-table tr')).slice(1).map(r => {
@@ -948,11 +937,11 @@
                     headStyles: {
                         fillColor: [30, 58, 138],
                         textColor: [255, 255, 255],
-                        fontSize: 9,
+                        fontSize: 12,
                         fontStyle: 'bold'
                     },
                     bodyStyles: {
-                        fontSize: 9,
+                        fontSize: 11,
                         cellPadding: 1.5
                     },
                     columnStyles: {
@@ -962,7 +951,8 @@
                     margin: { left: 14, right: 14, top: 10 },
                     styles: {
                         lineWidth: 0.1,
-                        lineColor: [200, 200, 200],
+                        lineColor: [0, 0, 0],
+
                         overflow: 'linebreak'
                     },
                     pageBreak: 'avoid'  // Ensures everything stays on ONE page

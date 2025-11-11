@@ -500,7 +500,7 @@
         }
         if (inp.type === 'file' && inp.files[0] && inp.files[0].size > max) {
           grp.classList.add('invalid');
-          err.textContent = 'File too large. Max 5 MB.';
+          err.textContent = 'The file you selected is too large.';
           ok = false;
         }
       });

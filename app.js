@@ -333,14 +333,26 @@ if (!fs.existsSync(uploadDir)) {
 // Multer error handling
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
-    console.error("Multer error:", err);
-    return res.status(400).json({ error: `Multer error: ${err.message}` });
-  } else if (err) {
-    console.error("General error:", err);
-    return res.status(400).json({ error: err.message });
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        errors: [
+          { field: err.field, msg: "File size too large. Max 50MB allowed." }
+        ]
+      });
+    }
   }
-  next();
+
+  if (err.message === "Invalid file type") {
+    return res.status(400).json({
+      errors: [
+        { field: err.field || "document", msg: "Invalid file type uploaded." }
+      ]
+    });
+  }
+
+  next(err);
 });
+
 
 // POST route to handle form submission
 app.post("/support-department", upload, async (req, res) => {
@@ -427,16 +439,28 @@ app.post("/support-department", upload, async (req, res) => {
     await student.save();
     res.status(201).json({ message: "Student data saved successfully" });
   } catch (error) {
-    console.error("Error saving student data:", error);
-    if (error.name === "ValidationError") {
-      return res
-        .status(400)
-        .json({ error: "Validation error", details: error.errors });
-    } else if (error.code === 11000) {
-      return res.status(400).json({ error: "Duplicate student_id detected" });
-    }
-    res.status(500).json({ error: "Internal server error" });
+  console.error("Error saving student data:", error);
+
+  if (error.code === 11000) {
+    const dupField = Object.keys(error.keyPattern)[0];
+    return res.status(400).json({
+      errors: [
+        { field: dupField, msg: `${dupField.replace('_',' ')} already exists` }
+      ]
+    });
   }
+
+  if (error.name === "ValidationError") {
+    const formatted = Object.keys(error.errors).map(key => ({
+      field: key,
+      msg: error.errors[key].message
+    }));
+    return res.status(400).json({ errors: formatted });
+  }
+
+  res.status(500).json({ error: "Internal server error" });
+}
+
 });                                                                                                                                                                                                                                       
 
 
