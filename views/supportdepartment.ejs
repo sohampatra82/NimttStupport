@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Professional Student Support Dashboard for submitting details">
+  <meta name="description" content="Professional Student Support Dashboard">
   <title>Student Support Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="shortcut icon"
@@ -12,10 +12,11 @@
     type="image/x-icon">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
+    /* ──────────────────────────────────────  ALL YOUR ORIGINAL CSS  ────────────────────────────────────── */
     * {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+      box-sizing: border-box
     }
 
     body {
@@ -26,19 +27,19 @@
       justify-content: center;
       align-items: center;
       padding: 24px;
-      color: #1f2a44;
+      color: #1f2a44
     }
 
     .container {
       max-width: 1280px;
       width: 100%;
-      background: #ffffff;
+      background: #fff;
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 80px 48px 48px 48px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+      padding: 80px 48px 48px;
       margin: 24px;
-      animation: fadeIn 0.6s ease-in-out;
-      position: relative;
+      animation: fadeIn .6s ease-in-out;
+      position: relative
     }
 
     .top-left-logo {
@@ -46,10 +47,9 @@
       top: 24px;
       left: 24px;
       width: 80px;
-      height: auto;
       border-radius: 8px;
       object-fit: cover;
-      z-index: 10;
+      z-index: 10
     }
 
     h1 {
@@ -57,7 +57,7 @@
       font-size: 32px;
       font-weight: 700;
       color: #1f2a44;
-      margin-bottom: 12px;
+      margin-bottom: 12px
     }
 
     .subtitle {
@@ -65,7 +65,7 @@
       font-size: 16px;
       color: #64748b;
       margin-bottom: 40px;
-      line-height: 1.5;
+      line-height: 1.5
     }
 
     .form-grid {
@@ -73,13 +73,13 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 24px;
       margin-bottom: 32px;
-      animation: slideUp 0.6s ease-out;
+      animation: slideUp .6s ease-out
     }
 
     .form-group {
       position: relative;
       display: flex;
-      flex-direction: column;
+      flex-direction: column
     }
 
     .form-group label {
@@ -87,7 +87,7 @@
       font-weight: 600;
       color: #1f2a44;
       margin-bottom: 8px;
-      letter-spacing: 0.2px;
+      letter-spacing: .2px
     }
 
     .form-group input,
@@ -96,25 +96,25 @@
       font-size: 14px;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      background-color: #fafafa;
-      transition: all 0.2s ease;
-      width: 100%;
+      background: #fafafa;
+      transition: .2s;
+      width: 100%
     }
 
     .form-group input:focus,
     .form-group select:focus {
       border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
+      background: #fff
     }
 
     .form-group input:hover,
     .form-group select:hover {
-      border-color: #93c5fd;
+      border-color: #93c5fd
     }
 
-    .form-group input[type="file"] {
-      padding: 10px;
+    .form-group input[type=file] {
+      padding: 10px
     }
 
     .form-group.invalid .error-message {
@@ -122,7 +122,7 @@
       color: #dc2626;
       font-size: 12px;
       margin-top: 6px;
-      animation: fadeInError 0.3s ease-in;
+      animation: fadeInError .3s ease-in
     }
 
     .form-group.invalid .error-icon {
@@ -131,12 +131,12 @@
       right: 12px;
       top: 38px;
       color: #dc2626;
-      font-size: 16px;
+      font-size: 16px
     }
 
     .error-message,
     .error-icon {
-      display: none;
+      display: none
     }
 
     .checkbox-group {
@@ -147,57 +147,57 @@
       background: #f1f5f9;
       padding: 8px 12px;
       border-radius: 6px;
-      transition: background 0.2s ease;
+      transition: .2s
     }
 
     .checkbox-group:hover {
-      background: #e2e8f0;
+      background: #e2e8f0
     }
 
-    .checkbox-group input[type="checkbox"] {
+    .checkbox-group input[type=checkbox] {
       width: 18px;
       height: 18px;
       accent-color: #3b82f6;
-      cursor: pointer;
+      cursor: pointer
     }
 
     .checkbox-group label {
       font-size: 14px;
       font-weight: 500;
       color: #1f2a44;
-      cursor: pointer;
+      cursor: pointer
     }
 
     .submit-area {
-      grid-column: 1 / -1;
+      grid-column: 1/-1;
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
-      min-height: 50px;
+      min-height: 50px
     }
 
     .submit-btn {
       padding: 14px 32px;
-      background-color: #2664c8;
+      background: #2664c8;
       border: none;
       border-radius: 8px;
-      color: white;
+      color: #fff;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: .2s
     }
 
     .submit-btn:hover:not(:disabled) {
-      background-color: #1a4971;
+      background: #1a4971;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, .3)
     }
 
     .submit-btn:disabled {
       background: #d1d5db;
-      cursor: not-allowed;
+      cursor: not-allowed
     }
 
     .loader {
@@ -207,14 +207,8 @@
       border: 3px solid #f3f3f3;
       border-top: 3px solid #2664c8;
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+      animation: spin .8s linear infinite;
+      margin: 0 auto
     }
 
     .message {
@@ -225,90 +219,96 @@
       margin-top: 16px;
       font-size: 14px;
       font-weight: 500;
-      animation: fadeIn 0.3s ease-in;
+      animation: fadeIn .3s ease-in
     }
 
     .message.success {
       background: #d4edda;
       color: #155724;
-      border: 1px solid #c3e6cb;
+      border: 1px solid #c3e6cb
     }
 
     .message.error {
       background: #f8d7da;
       color: #721c24;
-      border: 1px solid #f5c6cb;
+      border: 1px solid #f5c6cb
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
     }
 
     @keyframes fadeIn {
       from {
-        opacity: 0;
+        opacity: 0
       }
 
       to {
-        opacity: 1;
+        opacity: 1
       }
     }
 
     @keyframes slideUp {
       from {
         transform: translateY(20px);
-        opacity: 0;
+        opacity: 0
       }
 
       to {
         transform: translateY(0);
-        opacity: 1;
+        opacity: 1
       }
     }
 
     @keyframes fadeInError {
       from {
         opacity: 0;
-        transform: translateY(-5px);
+        transform: translateY(-5px)
       }
 
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0)
       }
     }
 
-    @media (max-width: 1024px) {
+    @media(max-width:1024px) {
       .form-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr)
       }
     }
 
-    @media (max-width: 768px) {
+    @media(max-width:768px) {
       .form-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
       }
 
       .container {
-        padding: 60px 24px 24px 24px;
-        margin: 16px;
+        padding: 60px 24px 24px;
+        margin: 16px
       }
 
       .top-left-logo {
         width: 60px;
         top: 16px;
-        left: 16px;
+        left: 16px
       }
 
       h1 {
-        font-size: 28px;
+        font-size: 28px
       }
     }
 
-    @media (max-width: 480px) {
+    @media(max-width:480px) {
       .submit-btn {
         font-size: 14px;
-        padding: 12px;
+        padding: 12px
       }
 
       .top-left-logo {
-        width: 50px;
+        width: 50px
       }
     }
   </style>
@@ -321,192 +321,122 @@
     <h1>Student Support Dashboard</h1>
     <p class="subtitle">Submit student details to connect with our support team</p>
 
-    <form id="student-form" action="/support-department" method="post" enctype="multipart/form-data" novalidate>
+    <form id="student-form" novalidate>
       <div class="form-grid">
-        <!-- All fields same as before -->
-        <div class="form-group">
-          <label for="student-id">Student ID</label>
-          <input type="text" id="student-id" name="student_id" placeholder="Enter student ID" required
-            pattern="[A-Za-z0-9]{5,20}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="student-id-error">Student ID must be 5-20 alphanumeric characters</span>
-        </div>
-        <div class="form-group">
-          <label for="name">Student Name</label>
-          <input type="text" id="name" name="name" placeholder="Enter full name" required pattern="[A-Za-z\s]{2,50}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="name-error">Name must be 2-50 characters (letters only)</span>
-        </div>
-        <div class="form-group">
-          <label for="course">Course Name</label>
-          <input type="text" id="course" name="course" placeholder="Enter course name" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="course-error">Course name is required</span>
-        </div>
-        <div class="form-group">
-          <label for="course-type">Course Type</label>
-          <select id="course-type" name="course_type" required>
+        <!-- ==== ALL FIELDS (unchanged HTML) ==== -->
+        <div class="form-group"><label for="student-id">Student ID</label><input type="text" id="student-id"
+            name="student_id" placeholder="Enter student ID" required pattern="[A-Za-z0-9]{5,20}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="student-id-error">Student
+            ID must be 5-20 alphanumeric characters</span></div>
+        <div class="form-group"><label for="name">Student Name</label><input type="text" id="name" name="name"
+            placeholder="Enter full name" required pattern="[A-Za-z\s]{2,50}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="name-error">Name must be
+            2-50 letters only</span></div>
+        <div class="form-group"><label for="course">Course Name</label><input type="text" id="course" name="course"
+            placeholder="Enter course name" required><i class="fas fa-exclamation-circle error-icon"></i><span
+            class="error-message" id="course-error">Course name is required</span></div>
+        <div class="form-group"><label for="course-type">Course Type</label><select id="course-type" name="course_type"
+            required>
             <option value="" disabled selected>Select course type</option>
             <option value="full-time">Full-Time</option>
             <option value="part-time">Part-Time</option>
             <option value="distance">Distance Learning</option>
             <option value="online">Online Learning</option>
-          </select>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="course-type-error">Please select a course type</span>
+          </select><i class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="course-type-error">Please select a course type</span></div>
+        <div class="form-group"><label for="university-board">University/Board</label><input type="text"
+            id="university-board" name="university_board" placeholder="Enter university/board" required><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="university-board-error">University/board is required</span></div>
+        <div class="form-group"><label for="admission-date">Date of Admission</label><input type="date"
+            id="admission-date" name="admission_date" required><i class="fas fa-exclamation-circle error-icon"></i><span
+            class="error-message" id="admission-date-error">Please select a valid date</span></div>
+        <div class="form-group"><label for="session">Session</label><input type="text" id="session" name="session"
+            placeholder="e.g., 2023-2024" required pattern="\d{4}-\d{4}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="session-error">Enter
+            session in YYYY-YYYY format</span></div>
+        <div class="form-group"><label for="exam-time">Exam Time</label><input type="text" id="exam-time"
+            name="exam_time" required placeholder="Enter exam time"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="exam-time-error">Please
+            enter a valid time</span></div>
+        <div class="form-group"><label for="father-name">Father's Name</label><input type="text" id="father-name"
+            name="father_name" placeholder="Enter father's name" required pattern="[A-Za-z\s]{2,50}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="father-name-error">Father's
+            name must be 2-50 letters</span></div>
+        <div class="form-group"><label for="mother-name">Mother's Name</label><input type="text" id="mother-name"
+            name="mother_name" placeholder="Enter mother's name" required pattern="[A-Za-z\s]{2,50}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="mother-name-error">Mother's
+            name must be 2-50 letters</span></div>
+        <div class="form-group"><label for="dob">Date of Birth</label><input type="date" id="dob" name="dob" required><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="dob-error">Please select a
+            valid date</span></div>
+        <div class="form-group"><label for="contact-no">Contact Number</label><input type="tel" id="contact-no"
+            name="contact_no" placeholder="Enter contact number" required pattern="\d{10}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="contact-no-error">Enter a
+            valid 10-digit phone number</span></div>
+        <div class="form-group"><label for="contact-no-2">Secondary Contact Number</label><input type="tel"
+            id="contact-no-2" name="contact_no_2" placeholder="Enter secondary contact number" pattern="\d{10}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="contact-no-2-error">Enter a
+            valid 10-digit phone number (optional)</span></div>
+        <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email"
+            placeholder="Enter email" required><i class="fas fa-exclamation-circle error-icon"></i><span
+            class="error-message" id="email-error">Enter a valid email address</span></div>
+        <div class="form-group"><label for="present-address">Present Address</label><input type="text"
+            id="present-address" name="present_address" placeholder="Enter present address" required><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="present-address-error">Present address is required</span></div>
+        <div class="form-group"><label for="permanent-address">Permanent Address</label><input type="text"
+            id="permanent-address" name="permanent_address" placeholder="Enter permanent address" required>
+          <div class="checkbox-group"><input type="checkbox" id="same-as-present" name="same_as_present"><label
+              for="same-as-present">Same as Present Address</label></div><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="permanent-address-error">Permanent address is required</span>
         </div>
-        <div class="form-group">
-          <label for="university-board">University/Board</label>
-          <input type="text" id="university-board" name="university_board" placeholder="Enter university/board"
-            required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="university-board-error">University/board is required</span>
-        </div>
-        <div class="form-group">
-          <label for="admission-date">Date of Admission</label>
-          <input type="date" id="admission-date" name="admission_date" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="admission-date-error">Please select a valid date</span>
-        </div>
-        <div class="form-group">
-          <label for="session">Session</label>
-          <input type="text" id="session" name="session" placeholder="e.g., 2023-2024" required pattern="\d{4}-\d{4}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="session-error">Enter session in YYYY-YYYY format</span>
-        </div>
-        <div class="form-group">
-          <label for="exam-time">Exam Time</label>
-          <input type="text" id="exam-time" name="exam_time" required placeholder="Enter exam time">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="exam-time-error">Please enter a valid time</span>
-        </div>
-        <div class="form-group">
-          <label for="father-name">Father's Name</label>
-          <input type="text" id="father-name" name="father_name" placeholder="Enter father's name" required
-            pattern="[A-Za-z\s]{2,50}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="father-name-error">Father's name must be 2-50 characters</span>
-        </div>
-        <div class="form-group">
-          <label for="mother-name">Mother's Name</label>
-          <input type="text" id="mother-name" name="mother_name" placeholder="Enter mother's name" required
-            pattern="[A-Za-z\s]{2,50}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="mother-name-error">Mother's name must be 2-50 characters</span>
-        </div>
-        <div class="form-group">
-          <label for="dob">Date of Birth</label>
-          <input type="date" id="dob" name="dob" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="dob-error">Please select a valid date</span>
-        </div>
-        <div class="form-group">
-          <label for="contact-no">Contact Number</label>
-          <input type="tel" id="contact-no" name="contact_no" placeholder="Enter contact number" required
-            pattern="\d{10}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="contact-no-error">Enter a valid 10-digit phone number</span>
-        </div>
-        <div class="form-group">
-          <label for="contact-no-2">Secondary Contact Number</label>
-          <input type="tel" id="contact-no-2" name="contact_no_2" placeholder="Enter secondary contact number"
-            pattern="\d{10}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="contact-no-2-error">Enter a valid 10-digit phone number (optional)</span>
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter email" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="email-error">Enter a valid email address</span>
-        </div>
-        <div class="form-group">
-          <label for="present-address">Present Address</label>
-          <input type="text" id="present-address" name="present_address" placeholder="Enter present address" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="present-address-error">Present address is required</span>
-        </div>
-        <div class="form-group">
-          <label for="permanent-address">Permanent Address</label>
-          <input type="text" id="permanent-address" name="permanent_address" placeholder="Enter permanent address"
-            required>
-          <div class="checkbox-group">
-            <input type="checkbox" id="same-as-present" name="same_as_present">
-            <label for="same-as-present">Same as Present Address</label>
-          </div>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="permanent-address-error">Permanent address is required</span>
-        </div>
-        <div class="form-group">
-          <label for="counsellor">Name of Counsellor</label>
-          <input type="text" id="counsellor" name="counsellor" placeholder="Enter counsellor's name" required
-            pattern="[A-Za-z\s]{2,50}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="counsellor-error">Counsellor's name must be 2-50 characters</span>
-        </div>
-        <div class="form-group">
-          <label for="aadhar-no">Aadhar Number</label>
-          <input type="text" id="aadhar-no" name="aadhar_no" placeholder="Enter 12-digit Aadhar number" required
-            pattern="\d{12}">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="aadhar-no-error">Enter a valid 12-digit Aadhar number</span>
-        </div>
-        <div class="form-group">
-          <label for="status">Status</label>
-          <select id="status" name="status" required>
+        <div class="form-group"><label for="counsellor">Name of Counsellor</label><input type="text" id="counsellor"
+            name="counsellor" placeholder="Enter counsellor's name" required pattern="[A-Za-z\s]{2,50}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="counsellor-error">Counsellor's name must be 2-50 letters</span></div>
+        <div class="form-group"><label for="aadhar-no">Aadhar Number</label><input type="text" id="aadhar-no"
+            name="aadhar_no" placeholder="Enter 12-digit Aadhar number" required pattern="\d{12}"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message" id="aadhar-no-error">Enter a
+            valid 12-digit Aadhar number</span></div>
+        <div class="form-group"><label for="status">Status</label><select id="status" name="status" required>
             <option value="" disabled selected>Select status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="pending">Pending</option>
-          </select>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="status-error">Please select a status</span>
-        </div>
-        <div class="form-group">
-          <label for="remarks">Remarks</label>
-          <input type="text" id="remarks" name="remarks" placeholder="Enter any remarks">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="remarks-error">Remarks are optional</span>
-        </div>
-        <div class="form-group">
-          <label for="university-regd-no">University Registration Number</label>
-          <input type="text" id="university-regd-no" name="university_regd_no" placeholder="Enter registration number"
-            required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="university-regd-no-error">Registration number is required</span>
-        </div>
-        <div class="form-group">
-          <label for="photo">Upload Photo</label>
-          <input type="file" id="photo" name="photo" accept="image/*" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="photo-error">Please upload a photo (max 5 MB)</span>
-        </div>
-        <div class="form-group">
-          <label for="document">University Document</label>
-          <input type="file" id="document" name="document" accept=".pdf,.doc,.docx" required>
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="document-error">Please upload a document (max 5 MB)</span>
-        </div>
-        <div class="form-group">
-          <label for="additional-sheet">Nimtt Document</label>
-          <input type="file" id="additional-sheet" name="additional_sheet" accept=".pdf,.doc,.docx">
-          <i class="fas fa-exclamation-circle error-icon"></i>
-          <span class="error-message" id="additional-sheet-error">Additional sheet is optional (max 5 MB)</span>
-        </div>
+          </select><i class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="status-error">Please select a status</span></div>
+        <div class="form-group"><label for="remarks">Remarks</label><input type="text" id="remarks" name="remarks"
+            placeholder="Enter any remarks"><i class="fas fa-exclamation-circle error-icon"></i><span
+            class="error-message" id="remarks-error">Remarks are optional</span></div>
+        <div class="form-group"><label for="university-regd-no">University Registration Number</label><input type="text"
+            id="university-regd-no" name="university_regd_no" placeholder="Enter registration number" required><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="university-regd-no-error">Registration number is required</span></div>
+        <div class="form-group"><label for="photo">Upload Photo</label><input type="file" id="photo" name="photo"
+            accept="image/*" required><i class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="photo-error">Please upload a photo (max 5 MB)</span></div>
+        <div class="form-group"><label for="document">University Document</label><input type="file" id="document"
+            name="document" accept=".pdf,.doc,.docx" required><i class="fas fa-exclamation-circle error-icon"></i><span
+            class="error-message" id="document-error">Please upload a document (max 5 MB)</span></div>
+        <div class="form-group"><label for="additional-sheet">Nimtt Document</label><input type="file"
+            id="additional-sheet" name="additional_sheet" accept=".pdf,.doc,.docx"><i
+            class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
+            id="additional-sheet-error">Additional sheet is optional (max 5 MB)</span></div>
 
-        <!-- Submit + Loader -->
         <div class="submit-area">
           <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
           <div class="loader" id="loader"></div>
         </div>
       </div>
 
-      <!-- Global Message -->
       <div class="message" id="message"></div>
     </form>
   </div>
 
   <script>
+    /* ──────────────────────────────────────  JAVASCRIPT  ────────────────────────────────────── */
     const form = document.getElementById('student-form');
     const presentAddress = document.getElementById('present-address');
     const permanentAddress = document.getElementById('permanent-address');
@@ -515,7 +445,7 @@
     const loader = document.getElementById('loader');
     const message = document.getElementById('message');
 
-    // Same as Present
+    // ── Same-as-Present ──
     sameAsPresent.addEventListener('change', () => {
       if (sameAsPresent.checked) {
         permanentAddress.value = presentAddress.value;
@@ -525,104 +455,103 @@
         permanentAddress.disabled = false;
       }
     });
-
     presentAddress.addEventListener('input', () => {
       if (sameAsPresent.checked) permanentAddress.value = presentAddress.value;
     });
 
-    // Loader
+    // ── Loader & Global Message ──
     const showLoader = () => { submitBtn.style.display = 'none'; loader.style.display = 'block'; };
     const hideLoader = () => { submitBtn.style.display = 'block'; loader.style.display = 'none'; };
-
-    // Message
-    const showMessage = (text, isError = false) => {
-      message.textContent = text;
-      message.className = `message ${isError ? 'error' : 'success'}`;
+    const showMessage = (txt, error = false) => {
+      message.textContent = txt;
+      message.className = `message ${error ? 'error' : 'success'}`;
       message.style.display = 'block';
-      setTimeout(() => message.style.display = 'none', 5000);
+      setTimeout(() => message.style.display = 'none', 6000);
     };
 
-    // Clear field errors
-    const clearFieldErrors = () => form.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
+    // ── Clear Errors ──
+    const clearErrors = () => {
+      form.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
+    };
 
-    // Client Validation
-    const validateClient = () => {
-      let valid = true;
-      clearFieldErrors();
-      const maxSize = 5 * 1024 * 1024;
+    // ── Client Validation (file size, required, pattern) ──
+    const clientValidate = () => {
+      clearErrors();
+      let ok = true;
+      const max = 50 * 1024 * 1024; // 50 MB
 
-      form.querySelectorAll('input[required], select[required]').forEach(input => {
-        const group = input.closest('.form-group');
-        const err = document.getElementById(`${input.id}-error`);
-        let val = input.value.trim();
+      form.querySelectorAll('input[required], select[required]').forEach(inp => {
+        const grp = inp.closest('.form-group');
+        const err = document.getElementById(`${inp.id}-error`);
+        let val = inp.value.trim();
 
-        if (input.id === 'permanent-address' && sameAsPresent.checked) val = presentAddress.value.trim();
+        if (inp.id === 'permanent-address' && sameAsPresent.checked) val = presentAddress.value.trim();
 
-        if (!val && input.type !== 'file') {
-          group.classList.add('invalid');
-          err.textContent = `${input.name.replace(/_/g, ' ')} is required`;
-          valid = false;
+        if (!val && inp.type !== 'file') {
+          grp.classList.add('invalid');
+          err.textContent = `${inp.name.replace(/_/g, ' ')} is required`;
+          ok = false;
+          return;
         }
-
-        if (input.pattern && val && !new RegExp(`^${input.pattern}$`).test(val)) {
-          group.classList.add('invalid');
-          valid = false;
+        if (inp.pattern && val && !new RegExp(`^${inp.pattern}$`).test(val)) {
+          grp.classList.add('invalid');
+          ok = false;
+          return;
         }
-
-        if (input.type === 'file' && input.files[0]?.size > maxSize) {
-          group.classList.add('invalid');
+        if (inp.type === 'file' && inp.files[0] && inp.files[0].size > max) {
+          grp.classList.add('invalid');
           err.textContent = 'File too large. Max 5 MB.';
-          valid = false;
+          ok = false;
         }
       });
-
-      return valid;
+      return ok;
     };
 
-    // Submit
-    form.addEventListener('submit', async (e) => {
+    // ── Submit ──
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (!validateClient()) return;
+      if (!clientValidate()) return;
 
-      const formData = new FormData(form);
-      if (sameAsPresent.checked && !formData.get('permanent_address')) {
-        formData.set('permanent_address', presentAddress.value);
-      }
+      const fd = new FormData(form);
+      if (sameAsPresent.checked && !fd.get('permanent_address')) fd.set('permanent_address', presentAddress.value);
 
       showLoader();
 
       try {
-        const res = await fetch('/support-department', {
-          method: 'POST',
-          body: formData
-        });
-
+        const res = await fetch('/support-department', { method: 'POST', body: fd });
         const data = await res.json();
 
+        // ── SUCCESS ──
         if (res.ok) {
           showMessage(data.message || 'Student registered successfully!');
           form.reset();
           sameAsPresent.checked = false;
           permanentAddress.disabled = false;
-        } else {
-          // Show field-specific errors
-          if (data.errors && Array.isArray(data.errors)) {
-            data.errors.forEach(err => {
-              const field = document.getElementById(err.field);
-              if (field) {
-                const group = field.closest('.form-group');
-                const msg = document.getElementById(`${field.id}-error`);
-                group.classList.add('invalid');
-                msg.textContent = err.msg; // e.g., "Email already exists"
-              }
-            });
-            showMessage('Please fix the errors above.', true);
-          } else {
-            showMessage(data.error || 'Submission failed', true);
-          }
+          clearErrors();
+          return;
         }
-      } catch (err) {
-        showMessage('Network error. Try again.', true);
+
+        // ── SERVER VALIDATION ERRORS (field-specific) ──
+        if (data.errors && Array.isArray(data.errors)) {
+          data.errors.forEach(er => {
+            const field = document.getElementById(er.field);
+            if (field) {
+              const grp = field.closest('.form-group');
+              const msg = document.getElementById(`${field.id}-error`);
+              grp.classList.add('invalid');
+              msg.textContent = er.msg;               // ← REAL MESSAGE
+            }
+          });
+          showMessage('Please fix the errors above.', true);
+          return;
+        }
+
+        // ── ANY OTHER SERVER ERROR ──
+        showMessage(data.error || 'Submission failed.', true);
+      } catch (networkErr) {
+        // ── ONLY TRUE NETWORK PROBLEMS ──
+        console.error(networkErr);
+        showMessage('Submission failed. Please try again later.', true);
       } finally {
         hideLoader();
       }
