@@ -96,7 +96,7 @@
         }
 
         .header {
-             
+
             padding: 20px 24px;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
@@ -740,10 +740,27 @@
                             value = formatDate(value);
                         }
 
+                        // FIXED: Always show photo & documents (handles backslashes + fallback)
                         if (field === "photo" && value && value !== "N/A") {
-                            value = `<img src="${value}" alt="Photo" style="max-height:120px; max-width:100%; border-radius:4px; cursor:pointer;" title="Click to enlarge">`;
-                        } else if ((field === "document" || field === "additional_sheet") && value && value !== "N/A") {
-                            value = `<a href="${value}" target="_blank" style="color:#3b82f6; text-decoration:underline;">View / Download</a>`;
+                            let photoPath = value.replace(/\\/g, "/"); // Fix Windows backslashes
+                            if (!photoPath.startsWith("http") && !photoPath.startsWith("/uploads")) {
+                                photoPath = "/uploads/" + photoPath.split("/").pop();
+                            }
+                            value = `<img src="${photoPath}" alt="Student Photo" 
+             style="max-height:130px; width:auto; border-radius:8px; cursor:pointer; border:3px solid #e2e8f0; box-shadow:0 4px 10px rgba(0,0,0,0.1);"
+             onerror="this.src='https://via.placeholder.com/150x180/f0f0f0/999?text=Photo+Not+Found'; this.onerror=null;"
+             title="Click to view full size">`;
+                        }
+                        else if ((field === "document" || field === "additional_sheet") && value && value !== "N/A") {
+                            let filePath = value.replace(/\\/g, "/");
+                            if (!filePath.startsWith("http") && !filePath.startsWith("/uploads")) {
+                                filePath = "/uploads/" + filePath.split("/").pop();
+                            }
+                            const fileName = filePath.split("/").pop();
+                            value = `<a href="${filePath}" target="_blank" 
+             style="background:#3b82f6; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:600; display:inline-block;">
+              🔗${fileName} (Open/Download)
+             </a>`;
                         }
 
                         return `<tr><td>${label}</td><td data-field="${field}" data-original="${encodeURIComponent(value)}">${value}</td></tr>`;
@@ -903,63 +920,63 @@
 
         // PDF — Small photo (40x50mm), right side, multi-page
         // PDF: ONE PAGE ONLY
-            document.getElementById('download-btn').onclick = async () => {
-                const sid = document.getElementById('student-id').value.trim();
-                if (!sid || document.getElementById('student-details').style.display !== 'block') {
-                    showModal('Error', 'Search a student first.');
-                    return;
-                }
+        document.getElementById('download-btn').onclick = async () => {
+            const sid = document.getElementById('student-id').value.trim();
+            if (!sid || document.getElementById('student-details').style.display !== 'block') {
+                showModal('Error', 'Search a student first.');
+                return;
+            }
 
-                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                let y = 15;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            let y = 15;
 
-                // Title
-                doc.setFontSize(16);
-                doc.setFont("helvetica", "bold");
-                doc.text("Student Details Report", 14, y);
-                y += 8;
+            // Title
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Student Details Report", 14, y);
+            y += 8;
 
-                // Photo on right (35x45 mm)
-             
+            // Photo on right (35x45 mm)
 
-                // Table data
-                const rows = Array.from(document.querySelectorAll('.excel-table tr')).slice(1).map(r => {
-                    const c = r.querySelectorAll('td');
-                    return [c[0].textContent, plainTextForPdf(c[1].innerHTML)];
-                });
 
-                // Compact table (fits on one page)
-                doc.autoTable({
-                    startY: y,
-                    head: [['Field', 'Details']],
-                    body: rows,
-                    theme: 'striped',
-                    headStyles: {
-                        fillColor: [30, 58, 138],
-                        textColor: [255, 255, 255],
-                        fontSize: 12,
-                        fontStyle: 'bold'
-                    },
-                    bodyStyles: {
-                        fontSize: 11,
-                        cellPadding: 1.5
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 50 },
-                        1: { cellWidth: 110 }
-                    },
-                    margin: { left: 14, right: 14, top: 10 },
-                    styles: {
-                        lineWidth: 0.1,
-                        lineColor: [0, 0, 0],
+            // Table data
+            const rows = Array.from(document.querySelectorAll('.excel-table tr')).slice(1).map(r => {
+                const c = r.querySelectorAll('td');
+                return [c[0].textContent, plainTextForPdf(c[1].innerHTML)];
+            });
 
-                        overflow: 'linebreak'
-                    },
-                    pageBreak: 'avoid'  // Ensures everything stays on ONE page
-                });
+            // Compact table (fits on one page)
+            doc.autoTable({
+                startY: y,
+                head: [['Field', 'Details']],
+                body: rows,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [30, 58, 138],
+                    textColor: [255, 255, 255],
+                    fontSize: 12,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 11,
+                    cellPadding: 1.5
+                },
+                columnStyles: {
+                    0: { cellWidth: 50 },
+                    1: { cellWidth: 110 }
+                },
+                margin: { left: 14, right: 14, top: 10 },
+                styles: {
+                    lineWidth: 0.1,
+                    lineColor: [0, 0, 0],
 
-                doc.save(`student_${sid}_details.pdf`);
-            };
+                    overflow: 'linebreak'
+                },
+                pageBreak: 'avoid'  // Ensures everything stays on ONE page
+            });
+
+            doc.save(`student_${sid}_details.pdf`);
+        };
 
         // Settings slider
         document.getElementById('settings-icon').addEventListener('click', (e) => {

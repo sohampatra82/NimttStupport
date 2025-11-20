@@ -324,6 +324,7 @@ app.post("/admin-update-data", async (req, res) => {
 });
 
 
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 const uploadDir = path.join(__dirname, "public/uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -357,111 +358,107 @@ app.use((err, req, res, next) => {
 // POST route to handle form submission
 app.post("/support-department", upload, async (req, res) => {
   try {
-    console.log("Form data:", req.body);
-    console.log("Files:", req.files);
-
     const {
-      student_id,
-      name,
-      course,
-      course_type,
-      university_board,
-      admission_date,
-      session,
-      exam_time,
-      father_name,
-      mother_name,
-      dob,
-      contact_no,
-      contact_no_2,
-      email,
-      present_address,
-      permanent_address,
-      counsellor,
-      aadhar_no,
-      status,
-      remarks,
-      university_regd_no,
-      same_as_present // Add this to capture checkbox value
+      student_id, name, course, course_type, university_board,
+      admission_date, session, exam_time, father_name, mother_name,
+      dob, contact_no, contact_no_2, email, present_address,
+      permanent_address, counsellor, aadhar_no, status, remarks,
+      university_regd_no, same_as_present
     } = req.body;
 
-    // Handle same_as_present logic
-    let finalPermanentAddress = permanent_address;
-    if (same_as_present === "on" && !permanent_address) {
-      finalPermanentAddress = present_address;
+    // Clean & validate
+    if (!student_id || !email || !aadhar_no || !university_regd_no) {
+      return res.status(400).json({ error: "All required fields must be filled" });
     }
 
+    let finalPermanentAddress = permanent_address?.trim();
+    if (same_as_present === "on" && !finalPermanentAddress) {
+      finalPermanentAddress = present_address?.trim();
+    }
     if (!finalPermanentAddress) {
       return res.status(400).json({ error: "Permanent address is required" });
     }
 
-    const photoPath = req.files["photo"]
-      ? path.join("uploads", req.files["photo"][0].filename)
-      : null;
-    const documentPath = req.files["document"]
-      ? path.join("uploads", req.files["document"][0].filename)
-      : null;
-    const additionalSheetPath = req.files["additional_sheet"]
-      ? path.join("uploads", req.files["additional_sheet"][0].filename)
-      : null;
-
-    if (!photoPath || !documentPath) {
-      return res.status(400).json({ error: "Photo and document are required" });
+    // File paths
+    if (!req.files?.photo || !req.files?.document) {
+      return res.status(400).json({ error: "Photo and University Document are required!" });
     }
 
+    const photoPath = path.join("uploads", req.files.photo[0].filename);
+    const documentPath = path.join("uploads", req.files.document[0].filename);
+    const additionalSheetPath = req.files.additional_sheet 
+      ? path.join("uploads", req.files.additional_sheet[0].filename) 
+      : null;
+
     const student = new StudentModel({
-      student_id,
-      name,
-      course,
+      student_id: student_id.trim(),
+      name: name.trim(),
+      course: course.trim(),
       course_type,
-      university_board,
+      university_board: university_board.trim(),
       admission_date: new Date(admission_date),
-      session,
-      exam_time,
-      father_name,
-      mother_name,
+      session: session.trim(),
+      exam_time: exam_time.trim(),
+      father_name: father_name.trim(),
+      mother_name: mother_name.trim(),
       dob: new Date(dob),
-      contact_no,
-      contact_no_2,
-      email,
-      present_address,
+      contact_no: contact_no.trim(),
+      contact_no_2: contact_no_2?.trim() || null,
+      email: email.trim().toLowerCase(),
+      present_address: present_address.trim(),
       permanent_address: finalPermanentAddress,
-      counsellor,
-      aadhar_no,
+      counsellor: counsellor.trim(),
+      aadhar_no: aadhar_no.trim(),
       status,
-      remarks,
-      university_regd_no,
+      remarks: remarks?.trim() || null,
+      university_regd_no: university_regd_no.trim(),
       photo: photoPath,
       document: documentPath,
       additional_sheet: additionalSheetPath
     });
 
     await student.save();
-    res.status(201).json({ message: "Student data saved successfully" });
+    res.status(201).json({ message: "Student registered successfully!" });
+
   } catch (error) {
-  console.error("Error saving student data:", error);
+    console.error("Save error:", error);
 
-  if (error.code === 11000) {
-    const dupField = Object.keys(error.keyPattern)[0];
-    return res.status(400).json({
-      errors: [
-        { field: dupField, msg: `${dupField.replace('_',' ')} already exists` }
-      ]
-    });
+    // PERFECT DUPLICATE ERROR HANDLING
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      let msg = "";
+
+      switch (field) {
+        case "student_id":
+          msg = "This Student ID is already registered!";
+          break;
+        case "email":
+          msg = "This Email is already in use!";
+          break;
+        case "aadhar_no":
+          msg = "This Aadhar Number is already registered!";
+          break;
+        case "university_regd_no":
+          msg = "This University Registration Number is already taken!";
+          break;
+        default:
+          msg = `${field.replace(/_/g, " ")} already exists`;
+      }
+
+      return res.status(400).json({ error: msg });
+    }
+
+    if (error.name === "ValidationError") {
+      const errors = Object.values(error.errors).map(e => ({
+        field: e.path,
+        msg: e.message
+      }));
+      return res.status(400).json({ errors });
+    }
+
+    res.status(500).json({ error: "Server error. Please try again." });
   }
-
-  if (error.name === "ValidationError") {
-    const formatted = Object.keys(error.errors).map(key => ({
-      field: key,
-      msg: error.errors[key].message
-    }));
-    return res.status(400).json({ errors: formatted });
-  }
-
-  res.status(500).json({ error: "Internal server error" });
-}
-
-});                                                                                                                                                                                                                                       
+});                                                                                                                                                                                                                                      
 
 
 // ADMIN SHOW DATA
@@ -861,9 +858,12 @@ app.post(
 const allowedAdminEmails = [
   "sneha@nimttgroup.com",
   "samir@nimttgroup.com",
-  "naynath@rediffmail.com",
+  "naynanath@rediffmail.com",
   "sohampatra866@gmail.com",
-  "jitubhi89@gmail.com"
+  "jitubhi89@gmail.com",
+  "test@gmail.com",
+  "test1@gmail.com",
+  "test2@gmail.com"
 ];
 
 // ADMIN SIGNUP

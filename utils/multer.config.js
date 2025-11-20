@@ -1,54 +1,55 @@
+// multerConfig.js  (or wherever you define upload)
 const multer = require("multer");
 const path = require("path");
-const crypto = require("crypto");
 
-// Define storage
+// Use memory storage OR fast disk storage WITHOUT crypto
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "./public/uploads");
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../public/uploads/"));
   },
-  filename: function(req, file, cb) {
-    crypto.randomBytes(12, function(err, name) {
-      if (err) return cb(err);
-      const fn = name.toString("hex") + path.extname(file.originalname);
-      cb(null, fn);
-    });
+  filename: (req, file, cb) => {
+    // FAST & SAFE filename - NO crypto.randomBytes!
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const filename =
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
+    cb(null, filename);
   }
 });
 
-// File filter to validate file types
-const fileFilter = (req, file, cb) => {
-  const allowedImageTypes = ["image/jpeg", "image/png", "image/gif"];
-  const allowedDocTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  ];
-
-  if (file.fieldname === "photo" && allowedImageTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else if (
-    (file.fieldname === "document" || file.fieldname === "additional_sheet") &&
-    allowedDocTypes.includes(file.mimetype)
-  ) {
-    cb(null, true);
-  } else {
-    cb(new Error("Invalid file type"), false);
-  }
-};
-
-// Multer configuration
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB limit
+    fileSize: 50 * 1024 * 1024 // 50MB max - strict!
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedImages = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+    const allowedDocs = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ];
+
+    if (file.fieldname === "photo" && allowedImages.includes(file.mimetype)) {
+      cb(null, true);
+    } else if (
+      (file.fieldname === "document" ||
+        file.fieldname === "additional_sheet") &&
+      allowedDocs.includes(file.mimetype)
+    ) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Invalid file type! Photo: JPG/PNG/GIF | Documents: PDF/DOC/DOCX only"
+        ),
+        false
+      );
+    }
   }
 }).fields([
   { name: "photo", maxCount: 1 },
   { name: "document", maxCount: 1 },
   { name: "additional_sheet", maxCount: 1 }
 ]);
-
 
 module.exports = upload;

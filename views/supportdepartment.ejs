@@ -435,128 +435,158 @@
     </form>
   </div>
 
-  <script>
-    /* ──────────────────────────────────────  JAVASCRIPT  ────────────────────────────────────── */
-    const form = document.getElementById('student-form');
-    const presentAddress = document.getElementById('present-address');
-    const permanentAddress = document.getElementById('permanent-address');
-    const sameAsPresent = document.getElementById('same-as-present');
-    const submitBtn = document.getElementById('submit-btn');
-    const loader = document.getElementById('loader');
-    const message = document.getElementById('message');
+ <script>
+  const form = document.getElementById('student-form');
+  const presentAddress = document.getElementById('present-address');
+  const permanentAddress = document.getElementById('permanent-address');
+  const sameAsPresent = document.getElementById('same-as-present');
+  const submitBtn = document.getElementById('submit-btn');
+  const loader = document.getElementById('loader');
+  const message = document.getElementById('message');
 
-    // ── Same-as-Present ──
-    sameAsPresent.addEventListener('change', () => {
-      if (sameAsPresent.checked) {
-        permanentAddress.value = presentAddress.value;
-        permanentAddress.disabled = true;
-      } else {
-        permanentAddress.value = '';
-        permanentAddress.disabled = false;
+  // ── Same-as-Present ──
+  sameAsPresent.addEventListener('change', () => {
+    if (sameAsPresent.checked) {
+      permanentAddress.value = presentAddress.value;
+      permanentAddress.disabled = true;
+    } else {
+      permanentAddress.value = '';
+      permanentAddress.disabled = false;
+    }
+  });
+  presentAddress.addEventListener('input', () => {
+    if (sameAsPresent.checked) permanentAddress.value = presentAddress.value;
+  });
+
+  // ── Loader & Global Message ──
+  const showLoader = () => { submitBtn.style.display = 'none'; loader.style.display = 'block'; };
+  const hideLoader = () => { submitBtn.style.display = 'block'; loader.style.display = 'none'; };
+  const showMessage = (txt, error = false) => {
+    message.textContent = txt;
+    message.className = `message ${error ? 'error' : 'success'}`;
+    message.style.display = 'block';
+    setTimeout(() => message.style.display = 'none', 6000);
+  };
+
+  // ── Clear All Errors ──
+  const clearErrors = () => {
+    form.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
+    form.querySelectorAll('.error-message').forEach(el => el.textContent = el.dataset.default || '');
+  };
+
+  // Save default error messages
+  document.querySelectorAll('.error-message').forEach(el => {
+    el.dataset.default = el.textContent;
+  });
+
+  // ── Client Validation ──
+  const clientValidate = () => {
+    clearErrors();
+    let ok = true;
+    const max = 50 * 1024 * 1024; // 50 MB
+
+    form.querySelectorAll('input[required], select[required]').forEach(inp => {
+      const grp = inp.closest('.form-group');
+      const err = document.getElementById(`${inp.id}-error`);
+      let val = inp.value.trim();
+
+      if (inp.id === 'permanent-address' && sameAsPresent.checked) val = presentAddress.value.trim();
+
+      if (!val && inp.type !== 'file') {
+        grp.classList.add('invalid');
+        err.textContent = `${inp.name.replace(/_/g, ' ')} is required`;
+        ok = false;
+      }
+      if (inp.pattern && val && !new RegExp(`^${inp.pattern}$`).test(val)) {
+        grp.classList.add('invalid');
+        ok = false;
+      }
+      if (inp.type === 'file' && inp.files[0] && inp.files[0].size > max) {
+        grp.classList.add('invalid');
+        err.textContent = 'File too large ';
+        ok = false;
       }
     });
-    presentAddress.addEventListener('input', () => {
-      if (sameAsPresent.checked) permanentAddress.value = presentAddress.value;
-    });
+    return ok;
+  };
 
-    // ── Loader & Global Message ──
-    const showLoader = () => { submitBtn.style.display = 'none'; loader.style.display = 'block'; };
-    const hideLoader = () => { submitBtn.style.display = 'block'; loader.style.display = 'none'; };
-    const showMessage = (txt, error = false) => {
-      message.textContent = txt;
-      message.className = `message ${error ? 'error' : 'success'}`;
-      message.style.display = 'block';
-      setTimeout(() => message.style.display = 'none', 6000);
-    };
+  // ── Submit Form ──
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!clientValidate()) return;
 
-    // ── Clear Errors ──
-    const clearErrors = () => {
-      form.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
-    };
+    const fd = new FormData(form);
+    if (sameAsPresent.checked && !fd.get('permanent_address')) {
+      fd.set('permanent_address', presentAddress.value);
+    }
 
-    // ── Client Validation (file size, required, pattern) ──
-    const clientValidate = () => {
-      clearErrors();
-      let ok = true;
-      const max = 50 * 1024 * 1024; // 50 MB
+    showLoader();
+    message.style.display = 'none';
 
-      form.querySelectorAll('input[required], select[required]').forEach(inp => {
-        const grp = inp.closest('.form-group');
-        const err = document.getElementById(`${inp.id}-error`);
-        let val = inp.value.trim();
-
-        if (inp.id === 'permanent-address' && sameAsPresent.checked) val = presentAddress.value.trim();
-
-        if (!val && inp.type !== 'file') {
-          grp.classList.add('invalid');
-          err.textContent = `${inp.name.replace(/_/g, ' ')} is required`;
-          ok = false;
-          return;
-        }
-        if (inp.pattern && val && !new RegExp(`^${inp.pattern}$`).test(val)) {
-          grp.classList.add('invalid');
-          ok = false;
-          return;
-        }
-        if (inp.type === 'file' && inp.files[0] && inp.files[0].size > max) {
-          grp.classList.add('invalid');
-          err.textContent = 'The file you selected is too large.';
-          ok = false;
-        }
+    try {
+      const res = await fetch('/support-department', {
+        method: 'POST',
+        body: fd
       });
-      return ok;
-    };
+      const data = await res.json();
 
-    // ── Submit ──
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      if (!clientValidate()) return;
-
-      const fd = new FormData(form);
-      if (sameAsPresent.checked && !fd.get('permanent_address')) fd.set('permanent_address', presentAddress.value);
-
-      showLoader();
-
-      try {
-        const res = await fetch('/support-department', { method: 'POST', body: fd });
-        const data = await res.json();
-
-        // ── SUCCESS ──
-        if (res.ok) {
-          showMessage(data.message || 'Student registered successfully!');
-          form.reset();
-          sameAsPresent.checked = false;
-          permanentAddress.disabled = false;
-          clearErrors();
-          return;
-        }
-
-        // ── SERVER VALIDATION ERRORS (field-specific) ──
-        if (data.errors && Array.isArray(data.errors)) {
-          data.errors.forEach(er => {
-            const field = document.getElementById(er.field);
-            if (field) {
-              const grp = field.closest('.form-group');
-              const msg = document.getElementById(`${field.id}-error`);
-              grp.classList.add('invalid');
-              msg.textContent = er.msg;               // ← REAL MESSAGE
-            }
-          });
-          showMessage('Please fix the errors above.', true);
-          return;
-        }
-
-        // ── ANY OTHER SERVER ERROR ──
-        showMessage(data.error || 'Submission failed.', true);
-      } catch (networkErr) {
-        // ── ONLY TRUE NETWORK PROBLEMS ──
-        console.error(networkErr);
-        showMessage('Submission failed. Please try again later.', true);
-      } finally {
-        hideLoader();
+      // SUCCESS
+      if (res.ok) {
+        showMessage("Student registered successfully!", false);
+        form.reset();
+        sameAsPresent.checked = false;
+        permanentAddress.disabled = false;
+        clearErrors();
+        return;
       }
-    });
-  </script>
+
+      // SINGLE ERROR (like duplicate Student ID, Email, Aadhar, etc.)
+      if (data.error) {
+        clearErrors();
+
+        let fieldToHighlight = null;
+        let errorMsg = data.error;
+
+        if (data.error.includes("Student ID")) fieldToHighlight = "student-id";
+        else if (data.error.includes("Email")) fieldToHighlight = "email";
+        else if (data.error.includes("Aadhar")) fieldToHighlight = "aadhar-no";
+        else if (data.error.includes("University Registration Number")) fieldToHighlight = "university-regd-no";
+
+        if (fieldToHighlight) {
+          const field = document.getElementById(fieldToHighlight);
+          const grp = field.closest('.form-group');
+          const errEl = document.getElementById(`${fieldToHighlight}-error`);
+          grp.classList.add('invalid');
+          errEl.textContent = errorMsg;
+        }
+
+        showMessage(errorMsg, true);
+        return;
+      }
+
+      // MULTIPLE VALIDATION ERRORS FROM SERVER
+      if (data.errors && Array.isArray(data.errors)) {
+        clearErrors();
+        data.errors.forEach(err => {
+          const field = document.getElementById(err.field);
+          if (field) {
+            const grp = field.closest('.form-group');
+            const msgEl = document.getElementById(`${err.field}-error`);
+            grp.classList.add('invalid');
+            if (msgEl) msgEl.textContent = err.msg;
+          }
+        });
+        showMessage("Please fix the errors above", true);
+      }
+
+    } catch (err) {
+      console.error(err);
+      showMessage("Network error. Please try again.", true);
+    } finally {
+      hideLoader();
+    }
+  });
+</script>
 </body>
 
 </html>

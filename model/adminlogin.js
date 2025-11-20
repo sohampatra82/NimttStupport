@@ -18,5 +18,5 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-const UserModel = mongoose.model("nimttadmin", UserSchema);
-module.exports = UserModel;
+const adminlogin = mongoose.model("nimttadmin", UserSchema);
+module.exports = adminlogin;
