@@ -842,49 +842,63 @@
         });
 
         // SAVE CHANGES
+       // SAVE CHANGES - FIXED VERSION
         document.getElementById('save-data').addEventListener('click', async () => {
             const studentId = document.getElementById('student-id').value.trim();
-            const updatedData = {};
+            if (!studentId) return;
+
+            const updatedData = { student_id: studentId };
             let isValid = true;
+
+            // First: remove all previous error styles
+            document.querySelectorAll('.editable-input.input-error').forEach(el => {
+                el.classList.remove('input-error');
+            });
 
             document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
                 const field = cell.dataset.field;
-                if (["photo", "document", "additional_sheet"].includes(field)) return;
+
+                // Skip file/photo fields
+                if (["photo", "document", "additional_sheet"].includes(field)) {
+                    return;
+                }
 
                 const input = cell.querySelector('input');
                 if (!input) return;
 
-                let value = input.value.trim();
+                let rawValue = input.value.trim();
+                let finalValue = rawValue === '' ? null : rawValue; // Important: convert empty → null
 
+                // === FIELD-SPECIFIC VALIDATION ===
                 if (field === 'admission_date' || field === 'dob') {
-                    if (value && isNaN(Date.parse(value))) {
+                    if (rawValue && isNaN(Date.parse(rawValue))) {
                         input.classList.add('input-error');
                         isValid = false;
-                    } else {
-                        value = value ? new Date(value).toISOString() : null;
+                    } else if (rawValue) {
+                        // Convert to proper Date or ISO string for backend
+                        finalValue = new Date(rawValue).toISOString();
                     }
-                } else if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                    input.classList.add('input-error');
-                    isValid = false;
-                } else if (['contact_no', 'contact_no_2'].includes(field) && value && !/^\d{10}$/.test(value)) {
-                    input.classList.add('input-error');
-                    isValid = false;
-                } else if (field === 'aadhar_no' && value && !/^\d{12}$/.test(value)) {
-                    input.classList.add('input-error');
-                    isValid = false;
-                } else {
-                    input.classList.remove('input-error');
+                }
+                else if (field === 'email' && rawValue) {
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawValue)) {
+                        input.classList.add('input-error');
+                        isValid = false;
+                    }
+                }
+                else if (['contact_no', 'contact_no_2'].includes(field) && rawValue) {
+                    if (!/^\d{10}$/.test(rawValue)) {
+                        input.classList.add('input-error');
+                        isValid = false;
+                    }
+                }
+                else if (field === 'aadhar_no' && rawValue) {
+                    if (!/^\d{12}$/.test(rawValue)) {
+                        input.classList.add('input-error');
+                        isValid = false;
+                    }
                 }
 
-                updatedData[field] = value || null;
-
-                // Restore original HTML (photo/link) or show updated text
-                const originalHTML = decodeURIComponent(cell.dataset.original);
-                if (["photo", "document", "additional_sheet"].includes(field)) {
-                    cell.innerHTML = originalHTML;
-                } else {
-                    cell.textContent = (field === 'admission_date' || field === 'dob') ? formatDate(value) : (value || 'N/A');
-                }
+                updatedData[field] = finalValue; // null if empty, otherwise cleaned value
             });
 
             if (!isValid) {
@@ -896,25 +910,33 @@
                 const response = await fetch('/admin-update-data', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ student_id: studentId, ...updatedData })
+                    credentials: "include",
+                    body: JSON.stringify(updatedData)
                 });
 
                 const result = await response.json();
+
                 if (response.ok) {
+                    // Success feedback
                     const msg = document.createElement('div');
                     msg.className = 'success-message';
-                    msg.textContent = 'Data updated successfully!';
+                    msg.textContent = '✅ Data updated successfully!';
                     document.getElementById('student-details').prepend(msg);
-                    setTimeout(() => msg.remove(), 3000);
+                    setTimeout(() => msg.remove(), 4000);
+
+                    // Exit edit mode & refresh data
                     isEditing = false;
                     document.getElementById('update-data').style.display = 'flex';
                     document.getElementById('save-data').style.display = 'none';
+
+                    // Refresh display with fresh data from server
                     fetchStudentData(studentId);
                 } else {
-                    showModal('Update Failed', result.message || 'Failed to update');
+                    showModal('Update Failed', result.message || 'Could not update student data');
                 }
-            } catch {
-                showModal('Error', 'Network error. Try again.');
+            } catch (err) {
+                console.error(err);
+                showModal('Error', 'Network error. Please try again.');
             }
         });
 
