@@ -17,6 +17,7 @@ const { get } = require("http");
 const { isLength } = require("validator");
 const jwt = require("jsonwebtoken"); //REQUIRE JWT FOR AUTHENTICATION
 const cookieParser = require("cookie-parser"); //REQUIRE COOKIE PARSER
+const adminAuth = require('./middleware/adminAuth') //REQUIRE ADMIN AUTH MIDDLEWARE
 app.set("view engine", "ejs"); //SET VIEW ENGINE TO EJS
 app.use(express.json({limit:'50mb'})); //USE JSON
 app.use(express.urlencoded({ limit:'50mb' ,extended: true })); //USE URL ENCODED
@@ -49,9 +50,11 @@ app.get("/change-password", (req, res) => {
   res.render("changepassword");
 });
 
-app.get("/admin-show-data", (req, res) => {
+app.get("/admin-show-data", adminAuth, (req, res) => {
+  res.set("Cache-Control", "no-store");
   res.render("adminShowdata");
 });
+
 app.get("/admin-sign-up", (req, res) => {
   res.render("adminsignup");
 });
@@ -630,6 +633,9 @@ app.post(
   }
 );
 
+
+
+
 //LOGIN
 app.post(
   "/support-department-login",
@@ -1145,6 +1151,46 @@ app.post(
     }
   }
 );
+
+// ADMIN LOG OUT
+
+app.get("/admin-logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict"
+  });
+
+  return res.send(`
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <title>Logout</title>
+      </head>
+      <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+          <h2 class="text-2xl font-semibold text-green-600 mb-4">
+            Logged Out Successfully
+          </h2>
+          <p class="text-gray-700 mb-4">
+            You have been logged out from the admin panel.
+          </p>
+          <p class="text-gray-600">
+            Redirecting to login page...
+          </p>
+          <script>
+            setTimeout(() => {
+              window.location.href = "/admin-login";
+            }, 2000);
+          </script>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
 
 // UPDATE PASSWORD FOR SUPPORT DEPARTMENT
 app.post(
