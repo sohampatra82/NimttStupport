@@ -327,7 +327,8 @@ app.post("/admin-update-data", async (req, res) => {
 });
 
 
-app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+app.use("/uploads", express.static("/home/administrator/uploads_all"));
+
 
 const uploadDir = path.join(__dirname, "public/uploads");
 if (!fs.existsSync(uploadDir)) {
