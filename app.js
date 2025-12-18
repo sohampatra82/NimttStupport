@@ -18,6 +18,7 @@ const { isLength } = require("validator");
 const jwt = require("jsonwebtoken"); //REQUIRE JWT FOR AUTHENTICATION
 const cookieParser = require("cookie-parser"); //REQUIRE COOKIE PARSER
 const adminAuth = require('./middleware/adminAuth') //REQUIRE ADMIN AUTH MIDDLEWARE
+const supportAuth = require('./middleware/supportAuth') //REQUIRE ADMIN AUTH MIDDLEWARE
 app.set("view engine", "ejs"); //SET VIEW ENGINE TO EJS
 app.use(express.json({limit:'50mb'})); //USE JSON
 app.use(express.urlencoded({ limit:'50mb' ,extended: true })); //USE URL ENCODED
@@ -43,9 +44,7 @@ app.get("/support-department-login", (req, res) => {
 app.get("/admin-login", (req, res) => {
   res.render("adminLogin"); //RENDER SUPPORT LOGIN PAGE
 });
-app.get("/support-department", (req, res) => {
-  res.render("supportdepartment");
-});
+
 app.get("/change-password", (req, res) => {
   res.render("changepassword");
 });
@@ -53,6 +52,10 @@ app.get("/change-password", (req, res) => {
 app.get("/admin-show-data", adminAuth, (req, res) => {
   res.set("Cache-Control", "no-store");
   res.render("adminShowdata");
+});
+app.get("/support-department", supportAuth, (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.render("supportdepartment");
 });
 
 app.get("/admin-sign-up", (req, res) => {
@@ -1184,6 +1187,45 @@ app.get("/admin-logout", (req, res) => {
           <script>
             setTimeout(() => {
               window.location.href = "/admin-login";
+            }, 2000);
+          </script>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
+
+// SUPPORT DEPARTMENT LOG OUT
+app.get("/support-logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict"
+  });
+
+  return res.send(`
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <title>Logout</title>
+      </head>
+      <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+          <h2 class="text-2xl font-semibold text-green-600 mb-4">
+            Logged Out Successfully
+          </h2>
+          <p class="text-gray-700 mb-4">
+            You have been logged out from the support department panel.
+          </p>
+          <p class="text-gray-600">
+            Redirecting to login page...
+          </p>
+          <script>
+            setTimeout(() => {
+              window.location.href = "/support-department-login";
             }, 2000);
           </script>
         </div>

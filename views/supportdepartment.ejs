@@ -11,6 +11,8 @@
     href="https://ik.imagekit.io/7de5cntkw/1692626704665-photoaidcom-cropped%20(1).jpeg?updatedAt=1738048156918"
     type="image/x-icon">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
     /* ──────────────────────────────────────  ALL YOUR ORIGINAL CSS  ────────────────────────────────────── */
     * {
@@ -171,14 +173,14 @@
     .submit-area {
       grid-column: 1/-1;
       display: flex;
-      justify-content: center;
+   justify-content: flex-start; /* LEFT */
       align-items: center;
       position: relative;
-      min-height: 50px
+      min-height: 50px;
     }
 
     .submit-btn {
-      padding: 14px 32px;
+      padding: 12px 40px;
       background: #2664c8;
       border: none;
       border-radius: 8px;
@@ -186,7 +188,9 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: .2s
+      transition: .2s;
+      margin-left: 0px;
+    
     }
 
     .submit-btn:hover:not(:disabled) {
@@ -209,7 +213,7 @@
       border-radius: 50%;
       animation: spin .8s linear infinite;
       margin: 0 auto
-    }
+      }
 
     .message {
       display: none;
@@ -311,6 +315,10 @@
         width: 50px
       }
     }
+    .submit-btn i {
+  margin-right: 8px;
+}
+
   </style>
 </head>
 
@@ -425,11 +433,42 @@
             class="fas fa-exclamation-circle error-icon"></i><span class="error-message"
             id="additional-sheet-error">Additional sheet is optional (max 5 MB)</span></div>
 
-        <div class="submit-area">
-          <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
-          <div class="loader" id="loader"></div>
-        </div>
+    <div class="submit-area">
+      <button type="submit" class="submit-btn" id="submit-btn">
+        <i class="fa-solid fa-paper-plane"></i>
+        Submit
+      </button>
+      <div class="loader" id="loader"></div>
+    </div>
+
       </div>
+<a class="logout" href="/support-logout" style="
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0 20px 20px;
+  margin-left: 0px;
+  width: 120px;
+  height: 35px;
+  gap: 0px;
+  background-color: #dc2626;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+" onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+    <path d="M6 2a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2h1v2h5V2H7v2H6V2z" />
+    <path
+      d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z" />
+  </svg>
+
+  Logout
+</a>
 
       <div class="message" id="message"></div>
     </form>
