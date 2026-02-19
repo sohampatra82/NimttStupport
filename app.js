@@ -21,9 +21,7 @@ const adminAuth = require('./middleware/adminAuth') //REQUIRE ADMIN AUTH MIDDLEW
 const supportAuth = require('./middleware/supportAuth') //REQUIRE ADMIN AUTH MIDDLEWARE
 app.set("view engine", "ejs"); //SET VIEW ENGINE TO EJS
 app.use(express.json({limit:'50mb'})); //USE JSON
-app.use(express.urlencoded({ limit: '50mb', extended: true })); //USE URL ENCODED
-app.use("/uploads", express.static("/home/administrator/uploads_all"));
-
+app.use(express.urlencoded({ limit:'50mb' ,extended: true })); //USE URL ENCODED
 app.use(express.static(path.join(__dirname, "public"))); //USE STATIC FILES
 app.use(cors()); //USE CORS
 app.use(cookieParser()); //USE COOKIE PARSER
@@ -273,6 +271,7 @@ app.post('/admin-update-data', upload, async (req, res) => {
 });
 
 
+app.use("/uploads", express.static("/home/administrator/uploads_all"));
 
 
 const uploadDir = path.join(__dirname, "public/uploads");
@@ -280,7 +279,28 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Multer error handling
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        errors: [
+          { field: err.field, msg: "File size too large. Max 50MB allowed." }
+        ]
+      });
+    }
+  }
 
+  if (err.message === "Invalid file type") {
+    return res.status(400).json({
+      errors: [
+        { field: err.field || "document", msg: "Invalid file type uploaded." }
+      ]
+    });
+  }
+
+  next(err);
+});
 
 
 // POST route to handle form submission
@@ -1243,30 +1263,6 @@ app.post(
     }
   }
 );
-
-
-// Multer error handling
-app.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({
-        errors: [
-          { field: err.field, msg: "File size too large. Max 50MB allowed." }
-        ]
-      });
-    }
-  }
-
-  if (err.message === "Invalid file type") {
-    return res.status(400).json({
-      errors: [
-        { field: err.field || "document", msg: "Invalid file type uploaded." }
-      ]
-    });
-  }
-
-  next(err);
-});
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
