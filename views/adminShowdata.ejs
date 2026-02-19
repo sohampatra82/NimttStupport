@@ -578,6 +578,28 @@
                 </div>
             </div>
             <div id="student-details"></div>
+            <div id="file-upload-section"
+                style="display:none; margin: 24px 0; padding: 20px; background:#f8fafc; border:1px solid #bfdbfe; border-radius:8px;">
+                <h4 style="margin:0 0 16px; color:#1e40af;">Update Documents / Photo (optional)</h4>
+            
+                <div style="margin-bottom:20px;">
+                    <label>Student Photo (JPG, PNG, GIF)</label>
+                    <input type="file" id="edit-photo" name="photo" accept="image/jpeg,image/png,image/gif">
+                    
+                </div>
+            
+                <div style="margin-bottom:20px;">
+                    <label>University Document (PDF / Word)</label>
+                    <input type="file" id="edit-document" name="document" accept=".pdf,.doc,.docx">
+                   
+                </div>
+            
+                <div>
+                    <label>Additional Sheet (PDF / Word)</label>
+                    <input type="file" id="edit-additional" name="additional_sheet" accept=".pdf,.doc,.docx">
+                    
+                </div>
+            </div>
             <div class="button-container">
                 <button class="download-btn" id="download-btn">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -839,27 +861,51 @@
         });
 
         // UPDATE MODE — KEEP photo & links
+      // ─── ENTER EDIT MODE ────────────────────────────────────────────────
         document.getElementById('update-data').addEventListener('click', () => {
             if (isEditing) return;
             isEditing = true;
+
             document.getElementById('update-data').style.display = 'none';
             document.getElementById('save-data').style.display = 'flex';
+            document.getElementById('file-upload-section').style.display = 'block';
 
+            // Safely show current file status (no crash if element missing)
+            const spans = {
+                photo: document.getElementById('current-photo-name'),
+                document: document.getElementById('current-document-name'),
+                additional_sheet: document.getElementById('current-additional-name')
+            };
+
+            const photoTd = document.querySelector('td[data-field="photo"]');
+            const docTd = document.querySelector('td[data-field="document"]');
+            const addTd = document.querySelector('td[data-field="additional_sheet"]');
+
+            if (spans.photo) spans.photo.textContent = photoTd?.innerHTML.includes('<img') ? 'Photo exists' : 'No photo';
+            if (spans.document) spans.document.textContent = docTd?.innerHTML.includes('<a') ? 'Document exists' : 'No document';
+            if (spans.additional_sheet) {
+                spans.additional_sheet.textContent = addTd?.innerHTML.includes('<a') ? 'File exists' : 'None';
+            }
+
+            // Convert text cells to editable inputs
             document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
                 const field = cell.dataset.field;
                 if (["photo", "document", "additional_sheet"].includes(field)) return;
 
-                const currentValue = cell.textContent.trim();
+                const text = cell.textContent.trim();
                 const input = document.createElement('input');
-                input.type = 'text';
                 input.className = 'editable-input';
-                input.value = currentValue === 'N/A' ? '' : currentValue;
+                input.value = (text === 'N/A') ? '' : text;
 
                 if (field === 'admission_date' || field === 'dob') {
                     input.type = 'date';
-                    input.value = currentValue !== 'N/A' ? currentValue.split('-').reverse().join('-') : '';
+                    if (text !== 'N/A' && text.match(/\d{2}-\d{2}-\d{4}/)) {
+                        const [dd, mm, yyyy] = text.split('-');
+                        input.value = `${yyyy}-${mm}-${dd}`;
+                    }
                 } else if (['contact_no', 'contact_no_2', 'aadhar_no'].includes(field)) {
                     input.type = 'tel';
+                    input.pattern = field === 'aadhar_no' ? '\\d{12}' : '\\d{10}';
                 } else if (field === 'email') {
                     input.type = 'email';
                 }
@@ -869,102 +915,97 @@
             });
         });
 
-        // SAVE CHANGES
-       // SAVE CHANGES - FIXED VERSION
+        // ─── SAVE CHANGES ───────────────────────────────────────────────────
         document.getElementById('save-data').addEventListener('click', async () => {
-            const studentId = document.getElementById('student-id').value.trim();
-            if (!studentId) return;
+            const sid = document.getElementById('student-id').value.trim();
+            if (!sid) return showModal('Error', 'Student ID is required');
 
-            const updatedData = { student_id: studentId };
-            let isValid = true;
+            const formData = new FormData();
+            formData.append('student_id', sid);
 
-            // First: remove all previous error styles
-            document.querySelectorAll('.editable-input.input-error').forEach(el => {
-                el.classList.remove('input-error');
-            });
+            let hasError = false;
 
             document.querySelectorAll('.excel-table td[data-field]').forEach(cell => {
                 const field = cell.dataset.field;
-
-                // Skip file/photo fields
-                if (["photo", "document", "additional_sheet"].includes(field)) {
-                    return;
-                }
+                if (["photo", "document", "additional_sheet"].includes(field)) return;
 
                 const input = cell.querySelector('input');
                 if (!input) return;
 
-                let rawValue = input.value.trim();
-                let finalValue = rawValue === '' ? null : rawValue; // Important: convert empty → null
+                const value = input.value.trim();
 
-                // === FIELD-SPECIFIC VALIDATION ===
-                if (field === 'admission_date' || field === 'dob') {
-                    if (rawValue && isNaN(Date.parse(rawValue))) {
+                // Simple client validation
+                if (value) {
+                    if ((field === 'admission_date' || field === 'dob') && isNaN(Date.parse(value))) {
                         input.classList.add('input-error');
-                        isValid = false;
-                    } else if (rawValue) {
-                        // Convert to proper Date or ISO string for backend
-                        finalValue = new Date(rawValue).toISOString();
+                        hasError = true;
                     }
-                }
-                else if (field === 'email' && rawValue) {
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawValue)) {
+                    if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
                         input.classList.add('input-error');
-                        isValid = false;
+                        hasError = true;
                     }
-                }
-                else if (['contact_no', 'contact_no_2'].includes(field) && rawValue) {
-                    if (!/^\d{10}$/.test(rawValue)) {
+                    if (['contact_no', 'contact_no_2'].includes(field) && !/^\d{10}$/.test(value)) {
                         input.classList.add('input-error');
-                        isValid = false;
+                        hasError = true;
                     }
-                }
-                else if (field === 'aadhar_no' && rawValue) {
-                    if (!/^\d{12}$/.test(rawValue)) {
+                    if (field === 'aadhar_no' && !/^\d{12}$/.test(value)) {
                         input.classList.add('input-error');
-                        isValid = false;
+                        hasError = true;
                     }
                 }
 
-                updatedData[field] = finalValue; // null if empty, otherwise cleaned value
+                formData.append(field, value);
             });
 
-            if (!isValid) {
-                showModal('Validation Error', 'Please correct the highlighted fields.');
+            // Append files only if selected
+            ['photo', 'document', 'additional_sheet'].forEach(field => {
+                const file = document.getElementById(`edit-${field === 'additional_sheet' ? 'additional' : field}`)?.files?.[0];
+                if (file) formData.append(field, file);
+            });
+
+            if (hasError) {
+                showModal('Validation Error', 'Please correct the red fields.');
                 return;
             }
 
+            // Debug – remove after testing
+            console.log("Saving student:", sid);
+            for (let [k, v] of formData.entries()) {
+                console.log(`${k.padEnd(20)} → ${v instanceof File ? 'FILE: ' + v.name : v.substring(0, 60)}`);
+            }
+
             try {
-                const response = await fetch('/admin-update-data', {
+                const resp = await fetch('/admin-update-data', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: "include",
-                    body: JSON.stringify(updatedData)
+                    body: formData,
+                    credentials: 'include'
                 });
 
-                const result = await response.json();
+                let result;
+                try {
+                    result = await resp.json();
+                } catch {
+                    throw new Error("Invalid response from server");
+                }
 
-                if (response.ok) {
-                    // Success feedback
-                    const msg = document.createElement('div');
-                    msg.className = 'success-message';
-                    msg.textContent = '✅ Data updated successfully!';
-                    document.getElementById('student-details').prepend(msg);
-                    setTimeout(() => msg.remove(), 4000);
-
-                    // Exit edit mode & refresh data
+                if (resp.ok) {
+                    showModal('Success', 'Updated successfully ✅');
                     isEditing = false;
                     document.getElementById('update-data').style.display = 'flex';
                     document.getElementById('save-data').style.display = 'none';
+                    document.getElementById('file-upload-section').style.display = 'none';
 
-                    // Refresh display with fresh data from server
-                    fetchStudentData(studentId);
+                    // Clear file inputs
+                    document.querySelectorAll('#file-upload-section input[type="file"]').forEach(el => el.value = '');
+
+                    // Reload data
+                    fetchStudentData(sid);
                 } else {
-                    showModal('Update Failed', result.message || 'Could not update student data');
+                    showModal('Update Failed', result.message || 'Server rejected update');
                 }
             } catch (err) {
-                console.error(err);
-                showModal('Error', 'Network error. Please try again.');
+                console.error("Save failed:", err);
+                showModal('Error', 'Could not save changes – check console');
             }
         });
 

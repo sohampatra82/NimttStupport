@@ -223,110 +223,51 @@ app.post("/authorized", (req, res) => {
 });
 
 
-app.post("/admin-update-data", async (req, res) => {
-  try {
-    const {
-      student_id,
-      name,
-      course,
-      course_type,
-      university_board,
-      admission_date,
-      session,
-      exam_time,
-      father_name,
-      mother_name,
-      dob,
-      present_address,
-      permanent_address,
-      contact_no,
-      contact_no_2,
-      email,
-      counsellor,
-      aadhar_no,
-      status,
-      remarks,
-      university_regd_no
-    } = req.body;
+app.post('/admin-update-data', upload, async (req, res) => {
+    try {
+        const { student_id } = req.body;
+        if (!student_id) return res.status(400).json({ message: "student_id required" });
 
-    // Validate required fields
-    if (!student_id) {
-      return res.status(400).json({ message: "Student ID is required" });
-    }
+        const student = await StudentModel.findOne({ student_id });
+        if (!student) return res.status(404).json({ message: "Student not found" });
 
-    // Validate email format if provided
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
-    }
+        const update = {};
 
-    // Validate contact numbers if provided (10 digits)
-    if (contact_no && !/^\d{10}$/.test(contact_no)) {
-      return res
-        .status(400)
-        .json({ message: "Contact Number must be a valid 10-digit number" });
-    }
-    if (contact_no_2 && !/^\d{10}$/.test(contact_no_2)) {
-      return res
-        .status(400)
-        .json({ message: "Contact Number 2 must be a valid 10-digit number" });
-    }
+        // Text fields – update if sent (empty = clear)
+        ['name','course','course_type','university_board','session','exam_time',
+         'father_name','mother_name','present_address','permanent_address',
+         'contact_no','contact_no_2','email','counsellor','aadhar_no',
+         'status','remarks','university_regd_no'].forEach(f => {
+            if (f in req.body) {
+                update[f] = req.body[f] === '' ? null : req.body[f].trim();
+            }
+        });
 
-    // Validate Aadhar number if provided (12 digits)
-    if (aadhar_no && !/^\d{12}$/.test(aadhar_no)) {
-      return res
-        .status(400)
-        .json({ message: "Aadhar Number must be a valid 12-digit number" });
-    }
-
-    // Validate dates if provided
-    if (admission_date && isNaN(Date.parse(admission_date))) {
-      return res.status(400).json({ message: "Invalid admission date format" });
-    }
-    if (dob && isNaN(Date.parse(dob))) {
-      return res.status(400).json({ message: "Invalid date of birth format" });
-    }
-
-    // Find the student
-    const student = await StudentModel.findOne({ student_id });
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
-
-    // Update student document with provided fields
-    const updatedStudent = await StudentModel.findOneAndUpdate(
-      { student_id },
-      {
-        $set: {
-          name: name || student.name,
-          course: course || student.course,
-          course_type: course_type || student.course_type,
-          university_board: university_board || student.university_board,
-          admission_date: admission_date || student.admission_date,
-          session: session || student.session,
-          exam_time: exam_time || student.exam_time,
-          father_name: father_name || student.father_name,
-          mother_name: mother_name || student.mother_name,
-          dob: dob || student.dob,
-          present_address: present_address || student.present_address,
-          permanent_address: permanent_address || student.permanent_address,
-          contact_no: contact_no || student.contact_no,
-          contact_no_2: contact_no_2 || student.contact_no_2,
-          email: email || student.email,
-          counsellor: counsellor || student.counsellor,
-          aadhar_no: aadhar_no || student.aadhar_no,
-          status: status || student.status,
-          remarks: remarks || student.remarks,
-          university_regd_no: university_regd_no || student.university_regd_no
+        // Dates
+        if ('admission_date' in req.body) {
+            update.admission_date = req.body.admission_date ? new Date(req.body.admission_date) : null;
         }
-      },
-      { new: true }
-    );
+        if ('dob' in req.body) {
+            update.dob = req.body.dob ? new Date(req.body.dob) : null;
+        }
 
-    res.status(200).json(updatedStudent);
-  } catch (error) {
-    console.error("Error updating student:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
+        // Files – replace only if uploaded
+        if (req.files?.photo?.[0])        update.photo = `uploads/${req.files.photo[0].filename}`;
+        if (req.files?.document?.[0])     update.document = `uploads/${req.files.document[0].filename}`;
+        if (req.files?.additional_sheet?.[0]) update.additional_sheet = `uploads/${req.files.additional_sheet[0].filename}`;
+
+        const updated = await StudentModel.findOneAndUpdate(
+            { student_id },
+            { $set: update },
+            { new: true, runValidators: true }
+        );
+
+        res.json(updated); // or format like your show route
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message || "Server error" });
+    }
 });
 
 
