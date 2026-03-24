@@ -57,7 +57,7 @@ const StudentSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+  
   },
   present_address: {
     type: String,
@@ -74,7 +74,7 @@ const StudentSchema = mongoose.Schema({
   aadhar_no: {
     type: String, // Changed to String to handle 12-digit Aadhar number
     required: true,
-    unique: true
+    
   },
   status: {
     type: String,
@@ -87,7 +87,7 @@ const StudentSchema = mongoose.Schema({
   university_regd_no: {
     type: String,
     required: true,
-    unique: true
+   
   },
   photo: {
     type: String,

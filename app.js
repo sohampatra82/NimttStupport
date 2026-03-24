@@ -409,7 +409,7 @@ app.post("/support-department", upload, async (req, res) => {
 
 
 // ADMIN SHOW DATA
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.post("/admin-show-data", async (req, res) => {
   try {
