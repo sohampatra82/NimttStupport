@@ -791,26 +791,31 @@
                         }
 
                         // FIXED: Always show photo & documents (handles backslashes + fallback)
-                        if (field === "photo" && value && value !== "N/A") {
-                            let photoPath = value.replace(/\\/g, "/"); // Fix Windows backslashes
-                            if (!photoPath.startsWith("http") && !photoPath.startsWith("/uploads")) {
-                                photoPath = "/uploads/" + photoPath.split("/").pop();
-                            }
-                            value = `<img src="${photoPath}" alt="Student Photo" 
-             style="max-height:130px; width:auto; border-radius:8px; cursor:pointer; border:3px solid #e2e8f0; box-shadow:0 4px 10px rgba(0,0,0,0.1);"
-             onerror="this.src='https://via.placeholder.com/150x180/f0f0f0/999?text=Photo+Not+Found'; this.onerror=null;"
-             title="Click to view full size">`;
+                       if (field === "photo" && value && value !== "N/A") {
+
+                            let fileName = value.split("/").pop().split("\\").pop();
+                            let photoPath = "/uploads/" + fileName;
+
+                            value = `
+        <img src="${photoPath}"
+        style="max-height:130px;border-radius:8px;"
+        onerror="this.src='https://via.placeholder.com/150x180?text=No+Photo'">
+    `;
                         }
-                        else if ((field === "document" || field === "additional_sheet") && value && value !== "N/A") {
-                            let filePath = value.replace(/\\/g, "/");
-                            if (!filePath.startsWith("http") && !filePath.startsWith("/uploads")) {
-                                filePath = "/uploads/" + filePath.split("/").pop();
-                            }
-                            const fileName = filePath.split("/").pop();
-                            value = `<a href="${filePath}" target="_blank" 
-             style="background:#3b82f6; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:600; display:inline-block;">
-              🔗${fileName} (Open/Download)
-             </a>`;
+                      else if ((field === "document" || field === "additional_sheet") && value && value !== "N/A") {
+
+                            // ALWAYS extract filename only
+                            let fileName = value.split("/").pop().split("\\").pop();
+
+                            // Build correct public URL
+                            let filePath = "/uploads/" + fileName;
+
+                            value = `
+        <a href="${filePath}" target="_blank"
+        style="background:#3b82f6;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;">
+        🔗 Open File (View / Download)
+        </a>
+    `;
                         }
 
                         return `<tr><td>${label}</td><td data-field="${field}" data-original="${encodeURIComponent(value)}">${value}</td></tr>`;
