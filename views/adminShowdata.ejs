@@ -791,27 +791,28 @@
                         }
 
                         // FIXED: Always show photo & documents (handles backslashes + fallback)
-           if (field === "photo" && value && value !== "N/A") {
-                            let fileName = value.split(/[/\\]/).pop();        // better regex
-                            let photoPath = `/uploads/${fileName}`;
-                            value = `
-    <img src="${photoPath}" 
-         style="max-height:130px;border-radius:8px;"
-         onerror="this.src='https://via.placeholder.com/150x180?text=No+Photo'; console.log('Photo failed: ${photoPath}');">
+           // Inside .map for tableRows
+                        let displayValue = studentData[field] ?? "N/A";
+
+                        if (field === "photo" && displayValue && displayValue !== "N/A") {
+                            // displayValue is already "/uploads/filename"
+                            displayValue = `
+    <img src="${displayValue}" 
+         style="max-height:130px; border-radius:8px; cursor:pointer;"
+         onerror="this.src='https://via.placeholder.com/150x180?text=Photo+Not+Found'; 
+                  console.error('Photo failed to load:', '${displayValue}');">
   `;
                         }
-                        else if ((field === "document" || field === "additional_sheet") && value && value !== "N/A") {
-                            let fileName = value.split(/[/\\]/).pop();
-                            let filePath = `/uploads/${fileName}`;
-                            value = `
-    <a href="${filePath}" target="_blank" 
+                        else if ((field === "document" || field === "additional_sheet") && displayValue && displayValue !== "N/A") {
+                            displayValue = `
+    <a href="${displayValue}" target="_blank" 
        style="background:#3b82f6;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;">
       🔗 Open File (View / Download)
     </a>
   `;
                         }
 
-                        return `<tr><td>${label}</td><td data-field="${field}" data-original="${encodeURIComponent(value)}">${value}</td></tr>`;
+                        return `<tr><td>${label}</td><td data-field="${field}">${displayValue}</td></tr>`;
                     }).join('');
 
                 document.getElementById('student-details').innerHTML = `

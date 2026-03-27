@@ -423,12 +423,26 @@ app.post("/admin-show-data", async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // Helper to get clean filename
-    const getFilename = (pathOrUrl) => {
-      if (!pathOrUrl) return "";
-      // Remove any full URL or folder path, keep only filename
-      return pathOrUrl.split(/[/\\]/).pop();   // handles both / and \
+    // === DEBUG LOGS (remove later) ===
+    console.log(`\n=== Student ${student_id} ===`);
+    console.log("Raw photo from DB:", student.photo);
+    console.log("Raw document from DB:", student.document);
+    console.log("Raw additional_sheet from DB:", student.additional_sheet);
+
+    const getCleanFilename = (value) => {
+      if (!value) return null;
+      // Remove any full URL or folder path, keep only the actual filename
+      return value.split(/[/\\]/).pop().trim();
     };
+
+    const cleanPhoto = getCleanFilename(student.photo);
+    const cleanDoc = getCleanFilename(student.document);
+    const cleanAdditional = getCleanFilename(student.additional_sheet);
+
+    console.log("Cleaned filename → Photo:", cleanPhoto);
+    console.log("Cleaned filename → Document:", cleanDoc);
+    console.log("Cleaned filename → Additional:", cleanAdditional);
+
     const studentData = {
       student_id: student.student_id,
       name: student.name,
@@ -451,11 +465,11 @@ app.post("/admin-show-data", async (req, res) => {
       status: student.status,
       remarks: student.remarks || "N/A",
       university_regd_no: student.university_regd_no,
-     photo: student.photo ? `/uploads/${getFilename(student.photo)}` : "",
-      document: student.document ? `/uploads/${getFilename(student.document)}` : "",
-      additional_sheet: student.additional_sheet 
-        ? `/uploads/${getFilename(student.additional_sheet)}` 
-        : ""
+
+      // ← Always return clean path for frontend
+      photo: cleanPhoto ? `/uploads/${cleanPhoto}` : "",
+      document: cleanDoc ? `/uploads/${cleanDoc}` : "",
+      additional_sheet: cleanAdditional ? `/uploads/${cleanAdditional}` : ""
     };
 
     res.status(200).json(studentData);
