@@ -423,7 +423,12 @@ app.post("/admin-show-data", async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    // Helper to get clean filename
+    const getFilename = (pathOrUrl) => {
+      if (!pathOrUrl) return "";
+      // Remove any full URL or folder path, keep only filename
+      return pathOrUrl.split(/[/\\]/).pop();   // handles both / and \
+    };
     const studentData = {
       student_id: student.student_id,
       name: student.name,
@@ -446,10 +451,10 @@ app.post("/admin-show-data", async (req, res) => {
       status: student.status,
       remarks: student.remarks || "N/A",
       university_regd_no: student.university_regd_no,
-      photo: student.photo ? `${baseUrl}/${student.photo}` : "",
-      document: student.document ? `${baseUrl}/${student.document}` : "",
-      additional_sheet: student.additional_sheet
-        ? `${baseUrl}/${student.additional_sheet}`
+     photo: student.photo ? `/uploads/${getFilename(student.photo)}` : "",
+      document: student.document ? `/uploads/${getFilename(student.document)}` : "",
+      additional_sheet: student.additional_sheet 
+        ? `/uploads/${getFilename(student.additional_sheet)}` 
         : ""
     };
 
