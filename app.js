@@ -333,8 +333,8 @@ app.post("/support-department", upload, async (req, res) => {
 
     const photoPath = path.join("uploads", req.files.photo[0].filename);
     const documentPath = path.join("uploads", req.files.document[0].filename);
-    const additionalSheetPath = req.files.additional_sheet 
-      ? path.join("uploads", req.files.additional_sheet[0].filename) 
+    const additionalSheetPath = req.files.additional_sheet
+      ? path.join("uploads", req.files.additional_sheet[0].filename)
       : null;
 
     const student = new StudentModel({
@@ -371,39 +371,51 @@ app.post("/support-department", upload, async (req, res) => {
     console.error("Save error:", error);
 
     // PERFECT DUPLICATE ERROR HANDLING
+    // if (error.code === 11000) {
+    //   const field = Object.keys(error.keyPattern)[0];
+    //   let msg = "";
+
+    //   switch (field) {
+    //     case "student_id":
+    //       msg = "This Student ID is already registered!";
+    //       break;
+    //     case "email":
+    //       msg = "This Email is already in use!";
+    //       break;
+    //     case "aadhar_no":
+    //       msg = "This Aadhar Number is already registered!";
+    //       break;
+    //     case "university_regd_no":
+    //       msg = "This University Registration Number is already taken!";
+    //       break;
+    //     default:
+    //       msg = `${field.replace(/_/g, " ")} already exists`;
+    //   }
+
+    //   return res.status(400).json({ error: msg });
+    // }
+
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
-      let msg = "";
-
-      switch (field) {
-        case "student_id":
-          msg = "This Student ID is already registered!";
-          break;
-        case "email":
-          msg = "This Email is already in use!";
-          break;
-        case "aadhar_no":
-          msg = "This Aadhar Number is already registered!";
-          break;
-        case "university_regd_no":
-          msg = "This University Registration Number is already taken!";
-          break;
-        default:
-          msg = `${field.replace(/_/g, " ")} already exists`;
+  
+      // Only Student ID should trigger duplicate error now
+      if (field === "student_id") {
+        return res.status(400).json({
+          error: "This Student ID is already registered!"
+        });
       }
 
-      return res.status(400).json({ error: msg });
-    }
 
-    if (error.name === "ValidationError") {
-      const errors = Object.values(error.errors).map(e => ({
-        field: e.path,
-        msg: e.message
-      }));
-      return res.status(400).json({ errors });
-    }
+      if (error.name === "ValidationError") {
+        const errors = Object.values(error.errors).map(e => ({
+          field: e.path,
+          msg: e.message
+        }));
+        return res.status(400).json({ errors });
+      }
 
-    res.status(500).json({ error: "Server error. Please try again." });
+      res.status(500).json({ error: "Server error. Please try again." });
+    }
   }
 });                                                                                                                                                                                                                                      
 
@@ -423,26 +435,7 @@ app.post("/admin-show-data", async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // === DEBUG LOGS (remove later) ===
-    console.log(`\n=== Student ${student_id} ===`);
-    console.log("Raw photo from DB:", student.photo);
-    console.log("Raw document from DB:", student.document);
-    console.log("Raw additional_sheet from DB:", student.additional_sheet);
-
-    const getCleanFilename = (value) => {
-      if (!value) return null;
-      // Remove any full URL or folder path, keep only the actual filename
-      return value.split(/[/\\]/).pop().trim();
-    };
-
-    const cleanPhoto = getCleanFilename(student.photo);
-    const cleanDoc = getCleanFilename(student.document);
-    const cleanAdditional = getCleanFilename(student.additional_sheet);
-
-    console.log("Cleaned filename → Photo:", cleanPhoto);
-    console.log("Cleaned filename → Document:", cleanDoc);
-    console.log("Cleaned filename → Additional:", cleanAdditional);
-
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
     const studentData = {
       student_id: student.student_id,
       name: student.name,
@@ -465,11 +458,11 @@ app.post("/admin-show-data", async (req, res) => {
       status: student.status,
       remarks: student.remarks || "N/A",
       university_regd_no: student.university_regd_no,
-
-      // ← Always return clean path for frontend
-      photo: cleanPhoto ? `/uploads/${cleanPhoto}` : "",
-      document: cleanDoc ? `/uploads/${cleanDoc}` : "",
-      additional_sheet: cleanAdditional ? `/uploads/${cleanAdditional}` : ""
+      photo: student.photo ? `${baseUrl}/${student.photo}` : "",
+      document: student.document ? `${baseUrl}/${student.document}` : "",
+      additional_sheet: student.additional_sheet
+        ? `${baseUrl}/${student.additional_sheet}`
+        : ""
     };
 
     res.status(200).json(studentData);
