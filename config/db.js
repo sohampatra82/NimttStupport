@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
 const dbConnect = mongoose
-  .connect("mongodb://0.0.0.0/nimttstundentsupport")
-  
+  .connect("mongodb://127.0.0.1:27017/nimttstundentsupport")
   .then(() => {
-    console.log("Nimtt Database is ready");
+    console.log( "Student Support Nimtt Database is ready");
   });
 
-module.exports - dbConnect;
+module.exports = dbConnect;
